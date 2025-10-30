@@ -1,5 +1,7 @@
 import { Eye, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { VerificationTable } from "@/components/verification-table"
+
 
 interface Document {
     id: number
@@ -16,9 +18,11 @@ interface DocumentsTableProps {
 
 export function DocumentsTable({ documents }: DocumentsTableProps) {
     return (
+
         <div className="overflow-x-auto">
             <table className="w-full border-collapse">
                 <thead>
+
                     <tr className="bg-[#005B2F] !text-white !bg-[#005B2F]">
 
                         <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>

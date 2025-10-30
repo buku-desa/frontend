@@ -9,32 +9,39 @@ export function Header() {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-        <header className="bg-green-50 border-b border-gray-200">
+        // 🔹 Biar header nempel di atas dan selalu terlihat saat scroll
+        <header className="fixed top-0 left-0 w-full bg-green-50 border-b border-gray-200 z-30 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Menu Button */}
+
+                    {/* Tombol strip tiga di pojok kiri atas */}
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
+                        className="p-2 text-gray-700 hover:text-green-700"
                     >
                         {isOpen ? <X size={24} /> : <Menu size={24} />}
                     </button>
 
                     {/* Navigation */}
-                    <nav className="hidden md:flex items-center gap-8">
+                    <nav className="hidden md:flex items-center gap-40">
                         <Link href="/" className="text-gray-800 font-medium hover:text-green-700">
                             Beranda
                         </Link>
-                        <Link href="/dokumen" className="text-gray-800 font-medium hover:text-green-700">
-                            Buku Lembaran Desa
+                        <Link href="/dokumen" className="text-gray-800 hover:text-green-700">
+                            Dokumen
                         </Link>
-                        <Link href="/berita" className="text-gray-800 font-medium hover:text-green-700">
-                            Berita Desa
+                        <Link href="/berita" className="text-gray-800 hover:text-green-700">
+                            Arsip
+                        </Link>
+                        <Link href="/" className="text-gray-800 hover:text-green-700">
+                            Log Aktivitas
                         </Link>
                     </nav>
 
-                    {/* Admin Button */}
-                    <Button className="bg-green-700 hover:bg-green-800 text-white rounded-full px-6">Admin</Button>
+                    {/* Tombol Admin */}
+                    <Button className="bg-green-700 hover:bg-green-800 text-white rounded-full px-6">
+                        Admin
+                    </Button>
                 </div>
 
                 {/* Mobile Menu */}
@@ -44,10 +51,13 @@ export function Header() {
                             Beranda
                         </Link>
                         <Link href="/dokumen" className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded">
-                            Buku Lembaran Desa
+                            Dokumen
                         </Link>
                         <Link href="/berita" className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded">
-                            Berita Desa
+                            Arsip
+                        </Link>
+                        <Link href="/" className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded">
+                            Log Aktivitas
                         </Link>
                     </nav>
                 )}

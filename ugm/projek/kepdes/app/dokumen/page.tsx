@@ -9,7 +9,8 @@ import { useState, useMemo } from "react"
 
 export default function DokumenPage() {
     const [searchQuery, setSearchQuery] = useState("")
-    const { documents } = useDocuments()
+    const { documents, verifyDocument } = useDocuments()
+
 
     const filteredDocuments = useMemo(() => {
         if (!searchQuery.trim()) {
@@ -26,23 +27,40 @@ export default function DokumenPage() {
         })
     }, [searchQuery, documents])
 
+    // Tambahkan fungsi handleVerify
+    const handleVerify = (docId: number) => {
+        const currentDate = new Date().toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        });
+        verifyDocument(docId, currentDate)
+        alert(`Dokumen berhasil diverifikasi pada ${currentDate} dan sekarang terlihat oleh publik!`);
+    };
+
+
     return (
         <main className="min-h-screen bg-gray-50">
             <Header />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" >
                 <div className="grid md:grid-cols-2 gap-8 mb-12">
-                    <DocumentCard total={104} />
+                    <DocumentCard />
                     <SearchBar onSearch={setSearchQuery} value={searchQuery} />
                 </div>
 
                 <div className="mb-12">
-                    <DocumentChart />
-                </div>
-
-                <div>
                     <h2 className="text-3xl font-bold text-gray-900 mb-6">Verifikasi Dokumen</h2>
-                    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                        <VerificationTable documents={filteredDocuments} isDocumentPage={true} />
+                    <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12">
+                        <VerificationTable documents={filteredDocuments} onVerify={handleVerify} />
+
+                    </div>
+
+
+                    <div className="12">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-6">Dokumen</h2>
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <VerificationTable documents={filteredDocuments} isDocumentPage={true} />
+                        </div>
                     </div>
                 </div>
             </div>
