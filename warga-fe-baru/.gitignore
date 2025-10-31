@@ -9,3 +9,6 @@ dist/
 !postcss.config.cjs
 !tailwind.config.cjs
 !eslint.config.cjs
+
+# Ignore warga-fe-dev folder
+../warga-fe-dev/
