@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.vscode/
+.env
+.next/
+*.js
+!next.config.js
+!*.config.js
+!postcss.config.cjs
+!tailwind.config.cjs
+!eslint.config.cjs
