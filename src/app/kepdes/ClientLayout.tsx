@@ -1,13 +1,22 @@
-"use client"
+// src/app/kepala-desa/ClientLayout.tsx
+"use client";
 
-import { DocumentsProvider } from "@/lib/contexts/documents-context"
-import { Header } from "@/components/kepala-desa/header"
+import { ReactNode } from "react";
+import { Header } from "@/components/kepala-desa/header";
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+
+export default function ClientLayout({ children }: { children: ReactNode }) {
   return (
-    <DocumentsProvider>
+    <>
       <Header />
-      <main className="pt-10">{children}</main>
-    </DocumentsProvider>
-  )
+      {/* Wrapper halaman dengan background */}
+      <div className="bg-gray-50 min-h-screen">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {children}
+        </main>
+      </div>
+
+    </>
+  );
 }
+

@@ -19,7 +19,7 @@ export default function AdminPage() {
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
   const [selectedPDF, setSelectedPDF] = useState<string>("");
   const [selectedTitle, setSelectedTitle] = useState<string>("");
-  
+
   // Modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
@@ -166,7 +166,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white p-6 md:p-8 lg:p-12">
+    <div>
       {/* Three Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Dokumen Card */}
@@ -292,7 +292,7 @@ export default function AdminPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
                       {/* View Button */}
-                      <button 
+                      <button
                         onClick={() => handleView(doc)}
                         className="bg-[#DC2626] hover:bg-[#B91C1C] text-white p-1.5 rounded transition-colors"
                         title="View"
@@ -309,7 +309,7 @@ export default function AdminPage() {
                         </svg>
                       </button>
                       {/* Download Button */}
-                      <button 
+                      <button
                         onClick={() => handleDownload(doc)}
                         className="bg-[#2D5F2E] hover:bg-[#234a23] text-white p-1.5 rounded transition-colors"
                         title="Download"
@@ -325,7 +325,7 @@ export default function AdminPage() {
                         </svg>
                       </button>
                       {/* Edit Button */}
-                      <button 
+                      <button
                         onClick={() => handleEdit(doc)}
                         className="bg-[#EAB308] hover:bg-[#CA8A04] text-white p-1.5 rounded transition-colors"
                         title="Edit"
@@ -341,7 +341,7 @@ export default function AdminPage() {
                         </svg>
                       </button>
                       {/* Archive/Delete Button */}
-                      <button 
+                      <button
                         onClick={() => handleArchive(doc)}
                         className="bg-[#3B82F6] hover:bg-[#2563EB] text-white p-1.5 rounded transition-colors"
                         title="Archive"
@@ -414,15 +414,13 @@ export default function AdminPage() {
                       {doc.nomorTanggalDitetapkan}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">{doc.tentang}</td>
-                    <td className={`px-4 py-3 text-sm ${
-                      doc.tanggal === "Loading" ? "text-blue-600" : "text-gray-900"
-                    }`}>
+                    <td className={`px-4 py-3 text-sm ${doc.tanggal === "Loading" ? "text-blue-600" : "text-gray-900"
+                      }`}>
                       {doc.tanggal}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">{doc.nomor}</td>
-                    <td className={`px-4 py-3 text-sm whitespace-pre-line ${
-                      doc.status === "Menunggu Verifikasi" ? "text-blue-600" : "text-gray-900"
-                    }`}>
+                    <td className={`px-4 py-3 text-sm whitespace-pre-line ${doc.status === "Menunggu Verifikasi" ? "text-blue-600" : "text-gray-900"
+                      }`}>
                       {doc.status}
                     </td>
                   </tr>
@@ -482,7 +480,7 @@ export default function AdminPage() {
                     <td className="px-4 py-3">
                       <div className="flex gap-1.5">
                         {/* View Button */}
-                        <button 
+                        <button
                           onClick={() => handleView(doc)}
                           className="bg-[#DC2626] hover:bg-[#B91C1C] text-white p-1.5 rounded transition-colors"
                           title="View"
@@ -499,7 +497,7 @@ export default function AdminPage() {
                           </svg>
                         </button>
                         {/* Download Button */}
-                        <button 
+                        <button
                           onClick={() => handleDownload(doc)}
                           className="bg-[#2D5F2E] hover:bg-[#234a23] text-white p-1.5 rounded transition-colors"
                           title="Download"
@@ -630,7 +628,7 @@ export default function AdminPage() {
                   <span className="bg-red-100 text-red-600 px-3 py-1 rounded text-xs font-medium">PDF</span>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm text-gray-600 mb-2">JENIS</label>
                 <input

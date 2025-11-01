@@ -91,7 +91,7 @@ export default function DokumenPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white p-6 md:p-8 lg:p-12">
+    <div className="space-y-8">
       {/* Dokumen Card */}
       <div className="mb-8">
         <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full max-w-md">
@@ -174,7 +174,7 @@ export default function DokumenPage() {
                 <td className="px-4 py-3">
                   <div className="flex gap-1.5">
                     {/* View Button - PAKAI ICON BUKAN TEXT */}
-                    <button 
+                    <button
                       onClick={() => handleView(doc)}
                       className="bg-[#DC2626] hover:bg-[#B91C1C] text-white p-1.5 rounded transition-colors"
                       title="View"
@@ -191,7 +191,7 @@ export default function DokumenPage() {
                       </svg>
                     </button>
                     {/* Download Button - PAKAI ICON BUKAN TEXT */}
-                    <button 
+                    <button
                       onClick={() => handleDownload(doc)}
                       className="bg-[#2D5F2E] hover:bg-[#234a23] text-white p-1.5 rounded transition-colors"
                       title="Download"
@@ -207,7 +207,7 @@ export default function DokumenPage() {
                       </svg>
                     </button>
                     {/* Edit Button - PAKAI ICON BUKAN TEXT */}
-                    <button 
+                    <button
                       onClick={() => handleEdit(doc)}
                       className="bg-[#EAB308] hover:bg-[#CA8A04] text-white p-1.5 rounded transition-colors"
                       title="Edit"
@@ -223,7 +223,7 @@ export default function DokumenPage() {
                       </svg>
                     </button>
                     {/* Archive Button - PAKAI ICON BUKAN TEXT */}
-                    <button 
+                    <button
                       onClick={() => handleArchive(doc)}
                       className="bg-[#3B82F6] hover:bg-[#2563EB] text-white p-1.5 rounded transition-colors"
                       title="Archive"
@@ -345,7 +345,7 @@ export default function DokumenPage() {
                   <span className="bg-red-100 text-red-600 px-3 py-1 rounded text-xs font-medium">PDF</span>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm text-gray-600 mb-2">JENIS</label>
                 <input

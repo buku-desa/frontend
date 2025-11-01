@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+
 export default function AdminLayout({
   children,
 }: {
@@ -33,9 +34,8 @@ export default function AdminLayout({
 
       {/* Sidebar - Hidden by default, muncul saat icon menu diklik */}
       <aside
-        className={`fixed left-0 top-0 w-64 h-screen bg-white border-r border-gray-200 overflow-y-auto z-50 transform transition-transform duration-300 ${
-          isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed left-0 top-0 w-64 h-screen bg-white border-r border-gray-200 overflow-y-auto z-50 transform transition-transform duration-300 ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
@@ -66,11 +66,10 @@ export default function AdminLayout({
                   <Link
                     href={item.path}
                     onClick={() => setIsMobileSidebarOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      isActive(item.path)
-                        ? "bg-[#2D5F2E] text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive(item.path)
+                      ? "bg-[#2D5F2E] text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                      }`}
                   >
                     <span className="text-xl">{item.icon}</span>
                     <span className="font-medium">{item.name}</span>
@@ -111,41 +110,37 @@ export default function AdminLayout({
             <nav className="flex items-center gap-8 mx-auto">
               <Link
                 href="/sekdes/dashboard"
-                className={`text-sm font-medium transition-colors ${
-                  isActive("/sekdes/dashboard")
-                    ? "text-gray-900"
-                    : "text-gray-700 hover:text-gray-900"
-                }`}
+                className={`text-sm font-medium transition-colors ${isActive("/sekdes/dashboard")
+                  ? "text-gray-900"
+                  : "text-gray-700 hover:text-gray-900"
+                  }`}
               >
                 Beranda
               </Link>
               <Link
                 href="/sekdes/dokumen"
-                className={`text-sm font-medium transition-colors ${
-                  isActive("/sekdes/dokumen")
-                    ? "text-gray-900"
-                    : "text-gray-700 hover:text-gray-900"
-                }`}
+                className={`text-sm font-medium transition-colors ${isActive("/sekdes/dokumen")
+                  ? "text-gray-900"
+                  : "text-gray-700 hover:text-gray-900"
+                  }`}
               >
                 Dokumen
               </Link>
               <Link
                 href="/sekdes/arsip"
-                className={`text-sm font-medium transition-colors ${
-                  isActive("/sekdes/arsip")
-                    ? "text-gray-900"
-                    : "text-gray-700 hover:text-gray-900"
-                }`}
+                className={`text-sm font-medium transition-colors ${isActive("/sekdes/arsip")
+                  ? "text-gray-900"
+                  : "text-gray-700 hover:text-gray-900"
+                  }`}
               >
                 Arsip
               </Link>
               <Link
                 href="/sekdes/aktivitas"
-                className={`text-sm font-medium transition-colors ${
-                  isActive("/sekdes/aktivitas")
-                    ? "text-gray-900"
-                    : "text-gray-700 hover:text-gray-900"
-                }`}
+                className={`text-sm font-medium transition-colors ${isActive("/sekdes/aktivitas")
+                  ? "text-gray-900"
+                  : "text-gray-700 hover:text-gray-900"
+                  }`}
               >
                 Log Aktivitas
               </Link>
@@ -171,9 +166,8 @@ export default function AdminLayout({
 
         {/* Mobile Sidebar */}
         <aside
-          className={`fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 md:hidden ${
-            isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 md:hidden ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <div className="p-4">
             <div className="flex items-center justify-between mb-6">
@@ -203,11 +197,10 @@ export default function AdminLayout({
                   <li key={item.path}>
                     <Link
                       href={item.path}
-                      className={`flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors ${
-                        isActive(item.path)
-                          ? "bg-[#2D5F2E] text-white"
-                          : "text-gray-700 hover:bg-green-50 hover:text-green-700"
-                      }`}
+                      className={`flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors ${isActive(item.path)
+                        ? "bg-[#2D5F2E] text-white"
+                        : "text-gray-700 hover:bg-green-50 hover:text-green-700"
+                        }`}
                       onClick={() => setIsMobileSidebarOpen(false)}
                     >
                       <span>{item.icon}</span>
@@ -221,7 +214,9 @@ export default function AdminLayout({
         </aside>
 
         {/* Main Content */}
-        <main>{children}</main>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {children}
+        </main>
       </div>
     </div>
   );

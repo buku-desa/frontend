@@ -89,7 +89,7 @@ export default function ArsipPage() {
 
     return (
         <main className="min-h-screen bg-gray-50 py-12 px-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
             {/* Header Card & Search */}
             <div className="flex flex-wrap justify-between items-center gap-3 mb-12">
                 <div className="bg-white border border-gray-300 shadow-md rounded-2xl p-4 flex items-center gap-3 ">
@@ -119,74 +119,74 @@ export default function ArsipPage() {
                     />
                 </div>
 
-            </div>
-            
 
 
-            {/* Tabel Arsip */}
-            <div className="bg-white rounded-2xl shadow-md overflow-x-auto">
-                <table className="w-full border-collapse">
-                    <thead>
-                        <tr className="bg-[#005B2F] text-white">
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">JENIS</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">
-                                NOMOR & TANGGAL DITETAPKAN
-                            </th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TENTANG</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TANGGAL</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
-                        </tr>
-                    </thead>
 
-                    <tbody>
-                        {filteredDocs.map((doc) => (
-                            <tr
-                                key={doc.id}
-                                className="hover:bg-gray-50 transition-colors duration-200"
-                            >
-                                <td className="border border-gray-300 px-4 py-3">{doc.id}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.jenis}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.nomorTanggalDitetapkan}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.tentang}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.tanggal}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.nomor}</td>
-                                <td className="border border-gray-300 px-4 py-3">
-                                    <div className="flex gap-2">
-                                        <Button
-                                            size="sm"
-                                            className="bg-red-600 hover:bg-red-700 text-white p-2 h-auto"
-                                            onClick={() => handleViewDocument(doc)}
-                                        >
-                                            <Eye size={18} />
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
-                                            onClick={() => handleDownloadClick(doc.id)}
-                                        >
-                                            <Download size={18} />
-                                        </Button>
-                                    </div>
-                                </td>
+
+                {/* Tabel Arsip */}
+                <div className="bg-white rounded-2xl shadow-md overflow-x-auto mt-8">
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr className="bg-[#005B2F] text-white">
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">JENIS</th>
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">
+                                    NOMOR & TANGGAL DITETAPKAN
+                                </th>
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TENTANG</th>
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TANGGAL</th>
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR</th>
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
                             </tr>
-                        ))}
-                        {filteredDocs.length === 0 && (
-                            <tr>
-                                <td
-                                    colSpan={7}
-                                    className="text-center py-6 text-gray-500 italic"
+                        </thead>
+
+                        <tbody>
+                            {filteredDocs.map((doc) => (
+                                <tr
+                                    key={doc.id}
+                                    className="hover:bg-gray-50 transition-colors duration-200"
                                 >
-                                    Tidak ada dokumen ditemukan.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                                    <td className="border border-gray-300 px-4 py-3">{doc.id}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{doc.jenis}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{doc.nomorTanggalDitetapkan}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{doc.tentang}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{doc.tanggal}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{doc.nomor}</td>
+                                    <td className="border border-gray-300 px-4 py-3">
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                className="bg-red-600 hover:bg-red-700 text-white p-2 h-auto"
+                                                onClick={() => handleViewDocument(doc)}
+                                            >
+                                                <Eye size={18} />
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
+                                                onClick={() => handleDownloadClick(doc.id)}
+                                            >
+                                                <Download size={18} />
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            {filteredDocs.length === 0 && (
+                                <tr>
+                                    <td
+                                        colSpan={7}
+                                        className="text-center py-6 text-gray-500 italic"
+                                    >
+                                        Tidak ada dokumen ditemukan.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            </div>
-            
+
             {/* PDF Viewer Modal */}
             <PDFViewerModal
                 isOpen={isPDFModalOpen}
