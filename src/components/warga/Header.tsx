@@ -1,11 +1,13 @@
+'use client'
+
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+import { usePathname } from 'next/navigation'
 
 export default function Header() {
-  const router = useRouter()
+  const pathname = usePathname()
 
   const linkClass = (path: string) =>
-    `hover:underline ${router.pathname === path ? 'text-emerald-800 font-semibold' : 'text-emerald-900'}`
+    `hover:underline ${pathname === path ? 'text-emerald-800 font-semibold' : 'text-emerald-900'}`
 
   return (
     <header className="bg-emerald-50 border-b border-emerald-100">
@@ -19,17 +21,17 @@ export default function Header() {
           <Link href="/" className="text-2xl font-bold text-emerald-800">Yogyakarta</Link>
         </div>
         <nav className="hidden md:flex gap-6 items-center text-sm">
-          <Link href="/" className={linkClass('/') } aria-current={router.pathname === '/' ? 'page' : undefined}>
+          <Link href="/warga" className={linkClass('/warga')} aria-current={pathname === '/warga' ? 'page' : undefined}>
             Beranda
           </Link>
           <Link
-            href="/buku-lembaran-desa"
-            className={linkClass('/buku-lembaran-desa')}
-            aria-current={router.pathname === '/buku-lembaran-desa' ? 'page' : undefined}
+            href="/lembaran-desa"
+            className={linkClass('/lembaran-desa')}
+            aria-current={pathname === '/lembaran-desa' ? 'page' : undefined}
           >
             Buku Lembaran Desa
           </Link>
-          <Link href="/berita-desa" className={linkClass('/berita-desa')} aria-current={router.pathname === '/berita-desa' ? 'page' : undefined}>
+          <Link href="/berita-desa" className={linkClass('/berita-desa')} aria-current={pathname === '/berita-desa' ? 'page' : undefined}>
             Berita Desa
           </Link>
         </nav>
