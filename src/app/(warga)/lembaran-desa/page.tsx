@@ -1,7 +1,9 @@
+'use client'
+
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Header from '../src/components/warga/Header'
-import BukuCard from '../src/components/warga/BukuCard'
+import Header from '@/components/warga/Header'
+import BukuCard from '@/components/warga/BukuCard'
 
 const bukuData = [
   {

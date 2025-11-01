@@ -1,10 +1,11 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Header from '../components/warga/Header'
-import Hero from '../components/warga/Hero'
-import SearchBar from '../components/warga/SearchBar'
-import BeritaCard from '../components/warga/BeritaCard'
-import BukuTable from '../components/warga/BukuTable'
+import Header from '@/components/warga/Header'
+import Image from 'next/image'
+import Hero from '@/public/hero.png'
+import SearchBar from '@/components/warga/SearchBar'
+import BeritaCard from '@/components/warga/BeritaCard'
+import BukuTable from '@/components/warga/BukuTable'
 
 const mockBerita = Array.from({ length: 4 }).map((_, i) => ({
   id: i + 1,
@@ -26,7 +27,7 @@ const Home: NextPage = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <Header />
-      <Hero />
+      <Image src={Hero} alt="Hero" className="w-full h-64 object-cover" />
       <SearchBar />
 
       <section className="max-w-6xl mx-auto px-4 mt-8">
