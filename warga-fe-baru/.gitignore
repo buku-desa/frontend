@@ -12,3 +12,7 @@ dist/
 
 # Ignore warga-fe-dev folder
 ../warga-fe-dev/
+
+# Also ignore any local helper folders accidentally created
+warga-fe-dev/
+**/node_modules/
