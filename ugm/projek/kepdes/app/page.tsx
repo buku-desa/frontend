@@ -1,14 +1,14 @@
 "use client"
 import { useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Header } from "@/components/header"
-import { DocumentCard } from "@/components/document-card"
-import { SearchBar } from "@/components/search-bar"
-import { VerificationTable } from "@/components/verification-table"
-import { DocumentChart } from "@/components/document-chart"
-import { useDocuments } from "./context/documents-context"
-import ArsipTabel from "@/components/arsiptabel"
-import TabelAktivitas from "@/components/tabelaktivitas"
+import { Header } from "@/components/kepala-desa/header"
+import { DocumentCard } from "@/components/kepala-desa/document-card"
+import { SearchBar } from "@/components/kepala-desa/search-bar"
+import { VerificationTable } from "@/components/kepala-desa/verification-table"
+import { DocumentChart } from "@/components/kepala-desa/document-chart"
+import { useDocuments } from "./(kepala-desa)/context/documents-context"
+import ArsipTabel from "@/components/kepala-desa/arsiptabel"
+import TabelAktivitas from "@/components/kepala-desa/tabelaktivitas"
 
 import { useState } from "react"
 
@@ -85,6 +85,12 @@ export default function Home() {
         </div>
 
 
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">Dokumen</h2>
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <VerificationTable documents={filteredDocuments} isDocumentPage={true} />
+          </div>
+        </div>
 
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">Arsip</h2>

@@ -1,5 +1,5 @@
 import { Eye, Download } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/kepala-desa/ui/button"
 import { VerificationTable } from "@/components/verification-table"
 
 

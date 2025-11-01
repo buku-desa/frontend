@@ -1,7 +1,7 @@
 "use client"
 
 import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/kepala-desa/ui/button"
 
 interface PDFViewerModalProps {
     isOpen: boolean

@@ -2,8 +2,8 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { DocumentsProvider } from "./context/documents-context"
-import { Header } from "@/components/header"
+import { DocumentsProvider } from "./(kepala-desa)/context/documents-context"
+import { Header } from "@/components/kepala-desa/header"
 
 import "./globals.css"
 

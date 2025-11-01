@@ -1,6 +1,6 @@
 "use client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/kepala-desa/ui/button"
+import { Input } from "@/components/kepala-desa/ui/input"
 
 interface SearchBarProps {
     onSearch?: (query: string) => void

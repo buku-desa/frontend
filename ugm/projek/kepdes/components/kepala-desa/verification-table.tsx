@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { Eye, Download, Check, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { DownloadConfirmationDialog } from "@/components/download-confirmation-dialog"
-import { VerificationConfirmationDialog } from "@/components/verification-confirmation-dialog"
-import { PDFViewerModal } from "@/components/pdf-viewer-modal"
+import { Button } from "@/components/kepala-desa/ui/button"
+import { DownloadConfirmationDialog } from "@/components/kepala-desa/download-confirmation-dialog"
+import { VerificationConfirmationDialog } from "@/components/kepala-desa/verification-confirmation-dialog"
+import { PDFViewerModal } from "@/components/kepala-desa/pdf-viewer-modal"
 
 interface VerificationDocument {
     id: number

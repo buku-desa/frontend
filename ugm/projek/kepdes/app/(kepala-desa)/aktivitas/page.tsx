@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SearchBar } from "@/components/search-bar"; // path sama seperti Arsip
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/kepala-desa/ui/button";
 
 interface Activity {
     no: number;
