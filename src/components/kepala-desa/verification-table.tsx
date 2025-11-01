@@ -1,11 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Eye, Download, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { DownloadConfirmationDialog } from "@/components/download-confirmation-dialog"
-import { VerificationConfirmationDialog } from "@/components/verification-confirmation-dialog"
-import { PDFViewerModal } from "@/components/pdf-viewer-modal"
+import { Eye, Download, Check, X } from "lucide-react"
+import { Button } from "@/components/shared/ui/button"
+import { DownloadConfirmationDialog } from "@/components/kepala-desa/download-confirmation-dialog"
+import { VerificationConfirmationDialog } from "@/components/kepala-desa/verification-confirmation-dialog"
+import { DeclineConfirmationDialog } from "@/components/kepala-desa/decline-confirmation-dialog"
+import { PDFViewerModal } from "@/components/kepala-desa/pdf-viewer-modal"
 
 interface VerificationDocument {
     id: number
@@ -14,7 +15,7 @@ interface VerificationDocument {
     tentang: string
     tanggal: string
     nomor: string
-    status: "loading" | "verified" | "pending"
+    status: "loading" | "verified" | "pending" | "declined"
     verificationDate?: string
     pdfUrl?: string
 }
@@ -23,14 +24,19 @@ interface VerificationTableProps {
     documents: VerificationDocument[]
     isDocumentPage?: boolean
     onVerify?: (docId: number) => void
+    onDecline?: (docId: number) => void
 }
 
-export function VerificationTable({ documents, isDocumentPage = false, onVerify }: VerificationTableProps) {
+export function VerificationTable({ documents, isDocumentPage = false, onVerify, onDecline }: VerificationTableProps) {
     const [downloadConfirm, setDownloadConfirm] = useState<{ isOpen: boolean; docId: number | null }>({
         isOpen: false,
         docId: null,
     })
     const [verifyConfirm, setVerifyConfirm] = useState<{ isOpen: boolean; docId: number | null }>({
+        isOpen: false,
+        docId: null,
+    })
+    const [declineConfirm, setDeclineConfirm] = useState<{ isOpen: boolean; docId: number | null }>({
         isOpen: false,
         docId: null,
     })
@@ -64,6 +70,17 @@ export function VerificationTable({ documents, isDocumentPage = false, onVerify 
             onVerify?.(verifyConfirm.docId)
         }
         setVerifyConfirm({ isOpen: false, docId: null })
+    }
+
+    const handleDeclineClick = (docId: number) => {
+        setDeclineConfirm({ isOpen: true, docId })
+    }
+
+    const handleDeclineConfirm = () => {
+        if (declineConfirm.docId) {
+            onDecline?.(declineConfirm.docId)
+        }
+        setDeclineConfirm({ isOpen: false, docId: null })
     }
 
     const handleViewClick = (doc: VerificationDocument) => {
@@ -130,11 +147,21 @@ export function VerificationTable({ documents, isDocumentPage = false, onVerify 
                     >
                         <Check size={18} />
                     </Button>
+                    <Button
+                        size="sm"
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 h-auto"
+                        onClick={() => handleDeclineClick(doc.id)}
+                    >
+                        <X size={18} />
+                    </Button>
                 </div>
             )
         }
         if (doc.status === "verified") {
             return <span className="text-gray-900 text-sm">Verifikasi {doc.verificationDate}</span>
+        }
+        if (doc.status === "declined") {
+            return <span className="text-red-600 text-sm font-semibold">Ditolak</span>
         }
         return null
     }
@@ -180,6 +207,12 @@ export function VerificationTable({ documents, isDocumentPage = false, onVerify 
                 isOpen={verifyConfirm.isOpen}
                 onConfirm={handleVerifyConfirm}
                 onCancel={() => setVerifyConfirm({ isOpen: false, docId: null })}
+                documentName="dokumen"
+            />
+            <DeclineConfirmationDialog
+                isOpen={declineConfirm.isOpen}
+                onConfirm={handleDeclineConfirm}
+                onCancel={() => setDeclineConfirm({ isOpen: false, docId: null })}
                 documentName="dokumen"
             />
             <PDFViewerModal

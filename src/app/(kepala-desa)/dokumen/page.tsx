@@ -1,15 +1,15 @@
 "use client"
-import { Header } from "@/components/header"
-import { DocumentCard } from "@/components/document-card"
-import { SearchBar } from "@/components/search-bar"
-import { DocumentChart } from "@/components/document-chart"
-import { VerificationTable } from "@/components/verification-table"
-import { useDocuments } from "../context/documents-context"
+import { Header } from "@/components/kepala-desa/header"
+import { DocumentCard } from "@/components/kepala-desa/document-card"
+import { SearchBar } from "@/components/kepala-desa/search-bar"
+import { DocumentChart } from "@/components/kepala-desa/document-chart"
+import { VerificationTable } from "@/components/kepala-desa/verification-table"
+import { useDocuments } from "@/lib/contexts/documents-context"
 import { useState, useMemo } from "react"
 
 export default function DokumenPage() {
     const [searchQuery, setSearchQuery] = useState("")
-    const { documents, verifyDocument } = useDocuments()
+    const { documents, verifyDocument, declineDocument } = useDocuments()
 
 
     const filteredDocuments = useMemo(() => {
@@ -38,6 +38,11 @@ export default function DokumenPage() {
         alert(`Dokumen berhasil diverifikasi pada ${currentDate} dan sekarang terlihat oleh publik!`);
     };
 
+    const handleDecline = (docId: number) => {
+        declineDocument(docId)
+        alert(`Dokumen dengan ID ${docId} telah ditolak.`)
+    }
+
 
     return (
         <main className="min-h-screen bg-gray-50">
@@ -52,7 +57,7 @@ export default function DokumenPage() {
                     <h2 className="text-3xl font-bold text-gray-900 mb-6">Verifikasi Dokumen</h2>
                     Total dokumen: {filteredDocuments.length}
                     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12">
-                        <VerificationTable documents={filteredDocuments} onVerify={handleVerify} />
+                        <VerificationTable documents={filteredDocuments} onVerify={handleVerify} onDecline={handleDecline} />
 
                     </div>
 

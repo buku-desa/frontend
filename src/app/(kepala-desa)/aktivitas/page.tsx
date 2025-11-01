@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { SearchBar } from "@/components/search-bar"; // path sama seperti Arsip
-import { Button } from "@/components/ui/button";
+import { SearchBar } from "@/components/kepala-desa/search-bar";
+import { Button } from "@/components/shared/ui/button";
 
 interface Activity {
     no: number;

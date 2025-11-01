@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { FileText } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/shared/ui/button"
 
 export function DocumentCard() {
     const [showPopup, setShowPopup] = useState(false)

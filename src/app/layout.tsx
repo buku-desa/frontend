@@ -1,9 +1,8 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
-import { DocumentsProvider } from "./context/documents-context"
-import { Header } from "@/components/header"
+import { DocumentsProvider } from "@/lib/contexts/documents-context"
+import { Header } from "@/components/kepala-desa/header"
 
 import "./globals.css"
 
@@ -28,7 +27,6 @@ export default function RootLayout({
           <Header />
           <main className="pt-10">{children}</main>
         </DocumentsProvider>
-        <Analytics />
       </body>
 
     </html>

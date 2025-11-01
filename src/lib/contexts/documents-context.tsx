@@ -9,13 +9,14 @@ export interface Document {
     tentang: string
     tanggal: string
     nomor: string
-    status: "loading" | "verified" | "pending"
+    status: "loading" | "verified" | "pending" | "declined"
     verificationDate?: string
 }
 
 interface DocumentsContextType {
     documents: Document[]
     verifyDocument: (docId: number, verificationDate: string) => void
+    declineDocument: (docId: number) => void
 }
 
 const DocumentsContext = createContext<DocumentsContextType | undefined>(undefined)
@@ -88,7 +89,20 @@ export function DocumentsProvider({ children }: { children: ReactNode }) {
         )
     }
 
-    return <DocumentsContext.Provider value={{ documents, verifyDocument }}>{children}</DocumentsContext.Provider>
+    const declineDocument = (docId: number) => {
+        setDocuments((prevDocs) =>
+            prevDocs.map((doc) =>
+                doc.id === docId
+                    ? {
+                        ...doc,
+                        status: "declined" as const,
+                    }
+                    : doc,
+            ),
+        )
+    }
+
+    return <DocumentsContext.Provider value={{ documents, verifyDocument, declineDocument }}>{children}</DocumentsContext.Provider>
 }
 
 export function useDocuments() {

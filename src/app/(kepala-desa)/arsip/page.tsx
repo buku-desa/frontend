@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { Eye, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { PDFViewerModal } from "@/components/pdf-viewer-modal";
-import { SearchBar } from "@/components/search-bar"; // pastikan path sesuai
+import { Button } from "@/components/shared/ui/button";
+import { PDFViewerModal } from "@/components/kepala-desa/pdf-viewer-modal";
+import { SearchBar } from "@/components/kepala-desa/search-bar";
+import { DownloadConfirmationDialog } from "@/components/kepala-desa/download-confirmation-dialog";
 
 interface ArchivedDocument {
     id: number;
@@ -21,6 +22,10 @@ export default function ArsipPage() {
     const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
     const [selectedPDF, setSelectedPDF] = useState<string>("");
     const [selectedTitle, setSelectedTitle] = useState<string>("");
+    const [downloadConfirm, setDownloadConfirm] = useState<{ isOpen: boolean; docId: number | null }>({
+        isOpen: false,
+        docId: null,
+    });
 
     const documents: ArchivedDocument[] = [
         {
@@ -58,6 +63,21 @@ export default function ArsipPage() {
             setSelectedTitle(`${doc.jenis} - ${doc.tentang}`);
             setIsPDFModalOpen(true);
         }
+    };
+
+    const handleDownloadClick = (docId: number) => {
+        setDownloadConfirm({ isOpen: true, docId });
+    };
+
+    const handleDownloadConfirm = () => {
+        const doc = documents.find((d) => d.id === downloadConfirm.docId);
+        if (doc && doc.pdfUrl) {
+            const link = document.createElement("a");
+            link.href = doc.pdfUrl;
+            link.download = `${doc.jenis}-${doc.nomor}.pdf`;
+            link.click();
+        }
+        setDownloadConfirm({ isOpen: false, docId: null });
     };
 
     const filteredDocs = documents.filter((doc) =>
@@ -142,6 +162,7 @@ export default function ArsipPage() {
                                         <Button
                                             size="sm"
                                             className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
+                                            onClick={() => handleDownloadClick(doc.id)}
                                         >
                                             <Download size={18} />
                                         </Button>
@@ -169,6 +190,14 @@ export default function ArsipPage() {
                 onClose={() => setIsPDFModalOpen(false)}
                 pdfUrl={selectedPDF}
                 documentName={selectedTitle}
+            />
+
+            {/* Download Confirmation Dialog */}
+            <DownloadConfirmationDialog
+                isOpen={downloadConfirm.isOpen}
+                onConfirm={handleDownloadConfirm}
+                onCancel={() => setDownloadConfirm({ isOpen: false, docId: null })}
+                documentName="dokumen"
             />
         </main>
     );

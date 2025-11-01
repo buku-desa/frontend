@@ -1,6 +1,6 @@
 import { Eye, Download } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { VerificationTable } from "@/components/verification-table"
+import { Button } from "@/components/shared/ui/button"
+import { VerificationTable } from "@/components/kepala-desa/verification-table"
 
 
 interface Document {

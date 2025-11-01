@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/shared/ui/button"
 
 export function Header() {
     const [isOpen, setIsOpen] = useState(false)
@@ -39,9 +39,11 @@ export function Header() {
                     </nav>
 
                     {/* Tombol Admin */}
-                    <Button className="bg-green-700 hover:bg-green-800 text-white rounded-full px-6">
-                        Admin
-                    </Button>
+                    <Link href="/login">
+                        <Button className="bg-green-700 hover:bg-green-800 text-white rounded-full px-6">
+                            Admin
+                        </Button>
+                    </Link>
                 </div>
 
                 {/* Mobile Menu */}
