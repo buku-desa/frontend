@@ -23,7 +23,6 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Warga FE Baru</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <Header />

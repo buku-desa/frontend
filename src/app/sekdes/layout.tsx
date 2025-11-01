@@ -15,10 +15,10 @@ export default function AdminLayout({
   const isActive = (path: string) => pathname === path;
 
   const menuItems = [
-    { name: "Dashboard", path: "/admin", icon: "📊" },
-    { name: "Dokumen", path: "/dokumen", icon: "📄" },
-    { name: "Arsip", path: "/arsip", icon: "🗄️" },
-    { name: "Log Aktivitas", path: "/aktivitas", icon: "🕒" },
+    { name: "Dashboard", path: "/sekdes/dashboard", icon: "📊" },
+    { name: "Dokumen", path: "/sekdes/dokumen", icon: "📄" },
+    { name: "Arsip", path: "/sekdes/arsip", icon: "🗄️" },
+    { name: "Log Aktivitas", path: "/sekdes/aktivitas", icon: "🕒" },
   ];
 
   return (
@@ -110,9 +110,9 @@ export default function AdminLayout({
             {/* Center Navigation */}
             <nav className="flex items-center gap-8 mx-auto">
               <Link
-                href="/admin"
+                href="/sekdes/dashboard"
                 className={`text-sm font-medium transition-colors ${
-                  isActive("/admin")
+                  isActive("/sekdes/dashboard")
                     ? "text-gray-900"
                     : "text-gray-700 hover:text-gray-900"
                 }`}
@@ -120,9 +120,9 @@ export default function AdminLayout({
                 Beranda
               </Link>
               <Link
-                href="/dokumen"
+                href="/sekdes/dokumen"
                 className={`text-sm font-medium transition-colors ${
-                  isActive("/dokumen")
+                  isActive("/sekdes/dokumen")
                     ? "text-gray-900"
                     : "text-gray-700 hover:text-gray-900"
                 }`}
@@ -130,9 +130,9 @@ export default function AdminLayout({
                 Dokumen
               </Link>
               <Link
-                href="/arsip"
+                href="/sekdes/arsip"
                 className={`text-sm font-medium transition-colors ${
-                  isActive("/arsip")
+                  isActive("/sekdes/arsip")
                     ? "text-gray-900"
                     : "text-gray-700 hover:text-gray-900"
                 }`}
@@ -140,9 +140,9 @@ export default function AdminLayout({
                 Arsip
               </Link>
               <Link
-                href="/aktivitas"
+                href="/sekdes/aktivitas"
                 className={`text-sm font-medium transition-colors ${
-                  isActive("/aktivitas")
+                  isActive("/sekdes/aktivitas")
                     ? "text-gray-900"
                     : "text-gray-700 hover:text-gray-900"
                 }`}
