@@ -13,9 +13,9 @@ export default function Header() {
           <Link href="/" className="text-2xl font-bold text-emerald-800">Yogyakarta</Link>
         </div>
         <nav className="hidden md:flex gap-6 items-center text-sm text-emerald-900">
-          <Link href="#">Beranda</Link>
-          <Link href="/buku-lembaran-desa">Buku Lembaran Desa</Link>
-          <Link href="/berita-desa">Berita Desa</Link>
+          <Link href="/" className="hover:underline">Beranda</Link>
+          <Link href="/buku-lembaran-desa" className="hover:underline">Buku Lembaran Desa</Link>
+          <Link href="/berita-desa" className="hover:underline">Berita Desa</Link>
         </nav>
       </div>
     </header>
