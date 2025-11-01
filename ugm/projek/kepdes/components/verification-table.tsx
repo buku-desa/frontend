@@ -74,6 +74,16 @@ export function VerificationTable({ documents, isDocumentPage = false, onVerify 
         })
     }
 
+    const filteredDocs = documents.filter(
+        (doc) =>
+            doc.jenis ||
+            doc.nomorTanggalDitetapkan ||
+            doc.tentang ||
+            doc.tanggal ||
+            doc.nomor
+    )
+
+
     const getStatusCell = (doc: VerificationDocument) => {
         if (isDocumentPage) {
             return (
@@ -87,7 +97,7 @@ export function VerificationTable({ documents, isDocumentPage = false, onVerify 
                     </Button>
                     <Button
                         size="sm"
-                        className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
+                        className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
                         onClick={() => handleDownloadClick(doc.id)}
                     >
                         <Download size={18} />
@@ -108,7 +118,7 @@ export function VerificationTable({ documents, isDocumentPage = false, onVerify 
                     </Button>
                     <Button
                         size="sm"
-                        className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
+                        className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
                         onClick={() => handleDownloadClick(doc.id)}
                     >
                         <Download size={18} />
@@ -131,10 +141,10 @@ export function VerificationTable({ documents, isDocumentPage = false, onVerify 
 
     return (
         <>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-auto max-h-fit">
                 <table className="w-full border-collapse">
                     <thead>
-                        <tr className="bg-green-700 text-white">
+                        <tr className="bg-[#005B2F] text-white">
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">JENIS</th>
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR & TANGGAL DITETAPKAN</th>
@@ -145,7 +155,7 @@ export function VerificationTable({ documents, isDocumentPage = false, onVerify 
                         </tr>
                     </thead>
                     <tbody>
-                        {documents.map((doc) => (
+                        {filteredDocs.map((doc) => (
                             <tr key={doc.id} className="hover:bg-gray-50">
                                 <td className="border border-gray-300 px-4 py-3 text-gray-900">{doc.id}</td>
                                 <td className="border border-gray-300 px-4 py-3 text-gray-900">{doc.jenis}</td>

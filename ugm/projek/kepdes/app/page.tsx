@@ -7,6 +7,9 @@ import { SearchBar } from "@/components/search-bar"
 import { VerificationTable } from "@/components/verification-table"
 import { DocumentChart } from "@/components/document-chart"
 import { useDocuments } from "./context/documents-context"
+import ArsipTabel from "@/components/arsiptabel"
+import TabelAktivitas from "@/components/tabelaktivitas"
+
 import { useState } from "react"
 
 const formatDateIndonesian = (date: Date): string => {
@@ -34,6 +37,7 @@ export default function Home() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const { documents, verifyDocument } = useDocuments()
+
 
   const handleDocumentClick = () => {
     router.push("/dokumen")
@@ -73,12 +77,35 @@ export default function Home() {
           <DocumentChart />
         </div>
 
-        <div>
+        <div >
           <h2 className="text-3xl font-bold text-gray-900 mb-6">Verifikasi Dokumen</h2>
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12">
             <VerificationTable documents={filteredDocuments} onVerify={handleVerify} />
           </div>
         </div>
+
+
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">Dokumen</h2>
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <VerificationTable documents={filteredDocuments} isDocumentPage={true} />
+          </div>
+        </div>
+
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">Arsip</h2>
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <ArsipTabel />
+          </div>
+        </div>
+
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">Log Aktivitas</h2>
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <TabelAktivitas />
+          </div>
+        </div>
+
       </div>
     </main>
   )

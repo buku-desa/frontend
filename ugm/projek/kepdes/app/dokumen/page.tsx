@@ -50,6 +50,7 @@ export default function DokumenPage() {
 
                 <div className="mb-12">
                     <h2 className="text-3xl font-bold text-gray-900 mb-6">Verifikasi Dokumen</h2>
+                    Total dokumen: {filteredDocuments.length}
                     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12">
                         <VerificationTable documents={filteredDocuments} onVerify={handleVerify} />
 

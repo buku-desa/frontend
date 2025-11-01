@@ -30,10 +30,10 @@ export function Header() {
                         <Link href="/dokumen" className="text-gray-800 hover:text-green-700">
                             Dokumen
                         </Link>
-                        <Link href="/berita" className="text-gray-800 hover:text-green-700">
+                        <Link href="/arsip" className="text-gray-800 hover:text-green-700">
                             Arsip
                         </Link>
-                        <Link href="/" className="text-gray-800 hover:text-green-700">
+                        <Link href="/aktivitas" className="text-gray-800 hover:text-green-700">
                             Log Aktivitas
                         </Link>
                     </nav>
@@ -53,10 +53,10 @@ export function Header() {
                         <Link href="/dokumen" className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded">
                             Dokumen
                         </Link>
-                        <Link href="/berita" className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded">
+                        <Link href="/arsip" className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded">
                             Arsip
                         </Link>
-                        <Link href="/" className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded">
+                        <Link href="/aktivitas" className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded">
                             Log Aktivitas
                         </Link>
                     </nav>
