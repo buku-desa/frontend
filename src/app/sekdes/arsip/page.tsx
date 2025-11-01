@@ -65,7 +65,9 @@ export default function ArsipPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white p-6 md:p-8 lg:p-12">
+
+    <div className="space-y-8">
+
       {/* Arsip Card */}
       <div className="mb-8">
         <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full max-w-md">
@@ -149,7 +151,7 @@ export default function ArsipPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
                       {/* Delete Button */}
-                      <button 
+                      <button
                         onClick={() => handleDelete(doc)}
                         className="bg-[#DC2626] hover:bg-[#B91C1C] text-white p-1.5 rounded transition-colors"
                         title="Delete Permanent"
@@ -165,7 +167,7 @@ export default function ArsipPage() {
                         </svg>
                       </button>
                       {/* Restore Button */}
-                      <button 
+                      <button
                         onClick={() => handleRestore(doc)}
                         className="bg-[#2D5F2E] hover:bg-[#234a23] text-white p-1.5 rounded transition-colors"
                         title="Restore"

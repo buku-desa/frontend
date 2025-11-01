@@ -5,6 +5,8 @@ import { SearchBar } from "@/components/kepala-desa/search-bar"
 import { DocumentChart } from "@/components/kepala-desa/document-chart"
 import { VerificationTable } from "@/components/kepala-desa/verification-table"
 import { useDocuments } from "@/lib/contexts/documents-context"
+import { JenisCard } from "@/components/kepala-desa/jenis-card"
+
 import { useState, useMemo } from "react"
 
 export default function DokumenPage() {
@@ -48,14 +50,24 @@ export default function DokumenPage() {
         <main className="min-h-screen bg-gray-50">
             <Header />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" >
-                <div className="grid md:grid-cols-2 gap-8 mb-12">
+                {/* 🔹 Baris atas: tiga item sejajar */}
+                <div className="grid md:grid-cols-3 gap-0 mb-12">
+
+
                     <DocumentCard />
-                    <SearchBar onSearch={setSearchQuery} value={searchQuery} />
+                    <JenisCard />
+                    <SearchBar
+                        onSearch={setSearchQuery}
+                        value={searchQuery}
+
+                    />
                 </div>
+
+
 
                 <div className="mb-12">
                     <h2 className="text-3xl font-bold text-gray-900 mb-6">Verifikasi Dokumen</h2>
-                    Total dokumen: {filteredDocuments.length}
+
                     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-12">
                         <VerificationTable documents={filteredDocuments} onVerify={handleVerify} onDecline={handleDecline} />
 
@@ -73,3 +85,5 @@ export default function DokumenPage() {
         </main>
     )
 }
+
+

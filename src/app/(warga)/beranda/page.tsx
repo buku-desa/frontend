@@ -29,7 +29,7 @@ const Home: NextPage = () => {
       <Image src={Hero} alt="Hero" className="w-full h-64 object-cover" />
       <SearchBar />
 
-      <section className="max-w-6xl mx-auto px-4 mt-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h2 className="text-xl font-semibold">Berita Desa</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
           {mockBerita.map((b) => (
@@ -38,7 +38,7 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-4 mt-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h2 className="text-xl font-semibold">Buku Lembaran Desa</h2>
         <BukuTable rows={mockRows} />
       </section>

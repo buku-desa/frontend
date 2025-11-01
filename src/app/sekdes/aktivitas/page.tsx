@@ -38,7 +38,7 @@ export default function AktivitasPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white p-6 md:p-8 lg:p-12">
+    <div className="space-y-8">
       {/* Aktivitas Card */}
       <div className="mb-8">
         <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full max-w-md">

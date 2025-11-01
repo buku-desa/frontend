@@ -49,7 +49,7 @@ export default function AktivitasPage() {
     return (
 
         <main className="min-h-screen bg-gray-50 py-12 px-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
             {/* Header Card & Search */}
             <div className="flex flex-wrap justify-between items-center gap-3 mb-12">
                 {/* Card Aktivitas */}
@@ -113,7 +113,7 @@ export default function AktivitasPage() {
                     </tbody>
                 </table>
             </div>
-        </div>
+
         </main>
     );
 }
