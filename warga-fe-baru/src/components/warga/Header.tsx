@@ -1,6 +1,12 @@
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 export default function Header() {
+  const router = useRouter()
+
+  const linkClass = (path: string) =>
+    `hover:underline ${router.pathname === path ? 'text-emerald-800 font-semibold' : 'text-emerald-900'}`
+
   return (
     <header className="bg-emerald-50 border-b border-emerald-100">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -12,10 +18,20 @@ export default function Header() {
           </button>
           <Link href="/" className="text-2xl font-bold text-emerald-800">Yogyakarta</Link>
         </div>
-        <nav className="hidden md:flex gap-6 items-center text-sm text-emerald-900">
-          <Link href="/" className="hover:underline">Beranda</Link>
-          <Link href="/buku-lembaran-desa" className="hover:underline">Buku Lembaran Desa</Link>
-          <Link href="/berita-desa" className="hover:underline">Berita Desa</Link>
+        <nav className="hidden md:flex gap-6 items-center text-sm">
+          <Link href="/" className={linkClass('/') } aria-current={router.pathname === '/' ? 'page' : undefined}>
+            Beranda
+          </Link>
+          <Link
+            href="/buku-lembaran-desa"
+            className={linkClass('/buku-lembaran-desa')}
+            aria-current={router.pathname === '/buku-lembaran-desa' ? 'page' : undefined}
+          >
+            Buku Lembaran Desa
+          </Link>
+          <Link href="/berita-desa" className={linkClass('/berita-desa')} aria-current={router.pathname === '/berita-desa' ? 'page' : undefined}>
+            Berita Desa
+          </Link>
         </nav>
       </div>
     </header>
