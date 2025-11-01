@@ -7,7 +7,7 @@ type Props = {
 
 export default function BeritaCardHorizontal({ title, date, description, isHighlighted = false }: Props) {
   return (
-    <div className={`bg-white rounded-lg shadow-md p-4 flex gap-4 items-start ${isHighlighted ? 'ring-2 ring-emerald-200' : ''}`}>
+    <div className={`bg-white rounded-lg shadow-md p-4 flex gap-4 items-start`}>
       {/* Image placeholder */}
       <div className="w-24 h-24 bg-amber-100 rounded-md flex-shrink-0 flex items-center justify-center">
         <svg className="w-12 h-12 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
