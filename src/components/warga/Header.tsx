@@ -18,10 +18,10 @@ export default function Header() {
               <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <Link href="/" className="text-2xl font-bold text-emerald-800">Yogyakarta</Link>
+          <Link href="/" className="text-2xl font-bold text-emerald-800">Caturtunggal</Link>
         </div>
         <nav className="hidden md:flex gap-6 items-center text-sm">
-          <Link href="/warga" className={linkClass('/warga')} aria-current={pathname === '/warga' ? 'page' : undefined}>
+          <Link href="/beranda" className={linkClass('/warga')} aria-current={pathname === '/warga' ? 'page' : undefined}>
             Beranda
           </Link>
           <Link

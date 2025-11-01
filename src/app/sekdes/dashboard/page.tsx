@@ -170,7 +170,7 @@ export default function AdminPage() {
       {/* Three Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Dokumen Card */}
-        <Link href="/dokumen" className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+        <Link href="/sekdes/dokumen" className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
           <div className="bg-black rounded-lg p-3 flex-shrink-0">
             <svg
               className="w-10 h-10 text-white"
@@ -188,7 +188,7 @@ export default function AdminPage() {
         </Link>
 
         {/* Arsip Card */}
-        <Link href="/arsip" className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+        <Link href="/sekdes/arsip" className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
           <div className="bg-black rounded-lg p-3 flex-shrink-0">
             <svg
               className="w-10 h-10 text-white"
@@ -210,7 +210,7 @@ export default function AdminPage() {
         </Link>
 
         {/* Aktivitas Card */}
-        <Link href="/aktivitas" className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+        <Link href="/sekdes/aktivitas" className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
           <div className="bg-black rounded-lg p-3 flex-shrink-0">
             <svg
               className="w-10 h-10 text-white"
@@ -233,7 +233,7 @@ export default function AdminPage() {
       {/* Scan Dokumen Button and Search */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-8">
         <button className="bg-[#2D5F2E] hover:bg-[#234a23] text-white px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium text-sm whitespace-nowrap transition-colors">
-          <span className="text-xl font-bold">+</span> Scan Dokumen
+          <span className="text-xl font-bold">+</span> Tambah Dokumen
         </button>
         <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-full px-5 py-2">
           <input
