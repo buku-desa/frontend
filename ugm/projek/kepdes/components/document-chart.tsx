@@ -14,8 +14,8 @@ const data = [
 
 export function DocumentChart() {
     return (
-        <div className="w-full h-80 bg-white p-6 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="w-full h-80 bg-white p-7 rounded-lg border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Jumlah Dokumen Administrasi Desa per Tahun
             </h3>
             <ResponsiveContainer width="100%" height="100%">

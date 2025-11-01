@@ -85,12 +85,6 @@ export default function Home() {
         </div>
 
 
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">Dokumen</h2>
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <VerificationTable documents={filteredDocuments} isDocumentPage={true} />
-          </div>
-        </div>
 
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">Arsip</h2>
