@@ -1,5 +1,4 @@
 "use client"
-import { Header } from "@/components/kepala-desa/header"
 import { DocumentCard } from "@/components/kepala-desa/document-card"
 import { SearchBar } from "@/components/kepala-desa/search-bar"
 import { DocumentChart } from "@/components/kepala-desa/document-chart"
@@ -48,7 +47,6 @@ export default function DokumenPage() {
 
     return (
         <main className="min-h-screen bg-gray-50">
-            <Header />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" >
                 {/* 🔹 Baris atas: tiga item sejajar */}
                 <div className="grid md:grid-cols-3 gap-0 mb-12">

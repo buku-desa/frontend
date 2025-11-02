@@ -1,7 +1,6 @@
 "use client"
 import { useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Header } from "@/components/kepala-desa/header"
 import { DocumentCard } from "@/components/kepala-desa/document-card"
 import { SearchBar } from "@/components/kepala-desa/search-bar"
 import { VerificationTable } from "@/components/kepala-desa/verification-table"
@@ -71,7 +70,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           <DocumentCard />

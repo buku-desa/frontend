@@ -360,13 +360,6 @@ export default function AdminPage() {
                   </td>
                 </tr>
               ))}
-              {/* Empty rows */}
-              <tr className="hover:bg-gray-50">
-                <td className="px-4 py-3 text-sm text-gray-300" colSpan={7}>4</td>
-              </tr>
-              <tr className="hover:bg-gray-50">
-                <td className="px-4 py-3 text-sm text-gray-300" colSpan={7}>5</td>
-              </tr>
             </tbody>
           </table>
         </div>
@@ -425,10 +418,6 @@ export default function AdminPage() {
                     </td>
                   </tr>
                 ))}
-                {/* Empty row */}
-                <tr className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-300" colSpan={7}>5</td>
-                </tr>
               </tbody>
             </table>
           </div>
