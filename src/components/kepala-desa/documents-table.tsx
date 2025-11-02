@@ -45,7 +45,7 @@ export function DocumentsTable({ documents }: DocumentsTableProps) {
                             <td className="border border-gray-300 px-4 py-3">{doc.nomor}</td>
                             <td className="border border-gray-300 px-4 py-3">
                                 <div className="flex gap-2">
-                                    <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white p-2 h-auto">
+                                    <Button size="sm" className="bg-zinc-600 hover:bg-zinc-500 text-white p-2 h-auto">
                                         <Eye size={18} />
                                     </Button>
                                     <Button size="sm" className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto">

@@ -13,13 +13,17 @@ interface MenuItem {
 
 interface AdminNavbarProps {
   basePath: string
-  adminRole?: string
-  adminName?: string
+  adminRole?: string // Ini akan jadi fallback
+  adminName?: string // Ini akan jadi fallback
 }
 
 export function AdminNavbar({ basePath, adminRole = "Admin", adminName = "Nama Admin" }: AdminNavbarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  
+  // --- State untuk data user ---
+  const [user, setUser] = useState<{ name: string; role: string } | null>(null)
+  
   const profileRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const router = useRouter()
@@ -33,6 +37,17 @@ export function AdminNavbar({ basePath, adminRole = "Admin", adminName = "Nama A
     { name: "Log Aktivitas", path: `${basePath}/aktivitas`, icon: "🕒" },
   ]
 
+  // --- Mengambil data user dari localStorage ---
+  useEffect(() => {
+    const storedName = localStorage.getItem("username")
+    const storedRole = localStorage.getItem("userRole")
+
+    if (storedName && storedRole) {
+      setUser({ name: storedName, role: storedRole })
+    }
+  }, [])
+  // --- Akhir ---
+
   // Tutup popup jika klik di luar
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -44,9 +59,21 @@ export function AdminNavbar({ basePath, adminRole = "Admin", adminName = "Nama A
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  // --- LOGIKA LOGOUT YANG BENAR ---
   const handleLogout = () => {
-    router.push("/")
+    // 1. HAPUS data sesi dari localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('username'); // Hapus semua yang Anda set saat login
+
+    // 2. SETELAH DIHAPUS, baru redirect ke halaman login
+    router.push("/");
   }
+  // --- AKHIR LOGIKA LOGOUT ---
+
+  // Tampilkan role yang benar (dari state atau fallback prop)
+  const displayRole = user?.role === "kepdes" ? "Kepala Desa" : user?.role === "sekdes" ? "Sekretaris Desa" : adminRole;
+  const displayName = user?.name || adminName;
 
   return (
     <>
@@ -66,7 +93,7 @@ export function AdminNavbar({ basePath, adminRole = "Admin", adminName = "Nama A
       >
         <div className="p-4">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-800">{adminRole}</h2>
+            <h2 className="text-lg font-semibold text-gray-800">{displayRole}</h2>
             <button
               onClick={() => setIsSidebarOpen(false)}
               className="text-gray-600 hover:text-gray-800 transition-colors"
@@ -152,12 +179,13 @@ export function AdminNavbar({ basePath, adminRole = "Admin", adminName = "Nama A
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg p-4 z-50">
                 <div className="mb-3">
-                  <p className="text-sm font-semibold text-gray-800">{adminName}</p>
-                  <p className="text-xs text-gray-500">{adminRole}</p>
+                  {/* Menggunakan data dari state/localStorage */}
+                  <p className="text-sm font-semibold text-gray-800">{displayName}</p>
+                  <p className="text-xs text-gray-500">{displayRole}</p>
                 </div>
                 <hr className="my-2" />
                 <button
-                  onClick={handleLogout}
+                  onClick={handleLogout} // <-- LOGIKA LOGOUT DIPASANG DI SINI
                   className="flex items-center gap-2 w-full text-left text-sm text-red-600 hover:text-red-700 font-medium"
                 >
                   <LogOut size={16} />
@@ -169,6 +197,7 @@ export function AdminNavbar({ basePath, adminRole = "Admin", adminName = "Nama A
         </div>
       </header>
 
+      {/* Spacer seukuran header */}
       <div className="h-16" />
     </>
   )
