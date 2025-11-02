@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/shared/ui/button"
+import { Eye, Download, Edit3, Archive } from "lucide-react"
+
 import { useState } from "react";
 import Link from "next/link";
 
@@ -14,11 +17,43 @@ interface Document {
   pdfUrl?: string;
 }
 
+interface Activity {
+  no: number;
+  waktu: string;
+  aksi: string;
+  user: string;
+  detailPerubahan: string;
+}
+
 export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
   const [selectedPDF, setSelectedPDF] = useState<string>("");
   const [selectedTitle, setSelectedTitle] = useState<string>("");
+  const activities: Activity[] = [
+    {
+      no: 1,
+      waktu: "21-08-2025 14:32",
+      aksi: "Verifikasi",
+      user: "Kepala Desa",
+      detailPerubahan: "Dokumen disetujui",
+    },
+    {
+      no: 2,
+      waktu: "21-08-2025 13:10",
+      aksi: "Edit",
+      user: "Sekretaris Desa",
+      detailPerubahan: "Nomor : 04 → 07",
+    },
+    {
+      no: 3,
+      waktu: "21-08-2025 12:55",
+      aksi: "Upload",
+      user: "Sekretaris Desa",
+      detailPerubahan: "Dokumen diurugan pertama kali",
+    },
+  ];
+
 
   // Modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -166,7 +201,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <div>
+    <div className="space-y-8">
       {/* Three Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Dokumen Card */}
@@ -232,7 +267,7 @@ export default function AdminPage() {
 
       {/* Scan Dokumen Button and Search */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-8">
-        <button className="bg-[#2D5F2E] hover:bg-[#234a23] text-white px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium text-sm whitespace-nowrap transition-colors">
+        <button className="bg-green-700 hover:bg-green-800 text-white px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium text-sm whitespace-nowrap transition-colors">
           <span className="text-xl font-bold">+</span> Tambah Dokumen
         </button>
         <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-full px-5 py-2">
@@ -243,7 +278,7 @@ export default function AdminPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button className="bg-[#2D5F2E] hover:bg-[#234a23] text-white px-5 py-1.5 rounded-full font-medium text-sm transition-colors">
+          <button className="bg-green-700 hover:bg-green-800 text-white px-5 py-1.5 rounded-full font-medium text-sm transition-colors">
             Search
           </button>
         </div>
@@ -253,7 +288,7 @@ export default function AdminPage() {
       <div className="bg-white rounded-lg overflow-hidden border border-gray-200 mb-12">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px]">
-            <thead className="bg-[#2D5F2E] text-white">
+            <thead className="bg-[#005B2F] !text-white !bg-[#005B2F]">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
                   NO
@@ -292,70 +327,34 @@ export default function AdminPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
                       {/* View Button */}
-                      <button
+                      <Button
+                        size="sm"
+                        className="bg-zinc-600 hover:bg-zinc-500 text-white p-2 h-auto"
                         onClick={() => handleView(doc)}
-                        className="bg-[#DC2626] hover:bg-[#B91C1C] text-white p-1.5 rounded transition-colors"
-                        title="View"
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-                      {/* Download Button */}
-                      <button
+                        <Eye size={16} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
                         onClick={() => handleDownload(doc)}
-                        className="bg-[#2D5F2E] hover:bg-[#234a23] text-white p-1.5 rounded transition-colors"
-                        title="Download"
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </button>
-                      {/* Edit Button */}
-                      <button
+                        <Download size={16} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-yellow-400 hover:bg-yellow-500 text-white p-2 h-auto"
                         onClick={() => handleEdit(doc)}
-                        className="bg-[#EAB308] hover:bg-[#CA8A04] text-white p-1.5 rounded transition-colors"
-                        title="Edit"
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      {/* Archive/Delete Button */}
-                      <button
+                        <Edit3 size={16} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-[#3B82F6] hover:bg-[#2563EB] text-white p-2 h-auto"
                         onClick={() => handleArchive(doc)}
-                        className="bg-[#3B82F6] hover:bg-[#2563EB] text-white p-1.5 rounded transition-colors"
-                        title="Archive"
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                        </svg>
-                      </button>
+                        <Archive size={16} />
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -373,7 +372,7 @@ export default function AdminPage() {
         <div className="bg-white rounded-lg overflow-hidden border border-gray-200">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
-              <thead className="bg-[#2D5F2E] text-white">
+              <thead className="bg-[#005B2F] !text-white !bg-[#005B2F]">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
                     NO
@@ -429,89 +428,36 @@ export default function AdminPage() {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Aktivitas</h2>
         <div className="bg-white rounded-lg overflow-hidden border border-gray-200">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px]">
-              <thead className="bg-[#2D5F2E] text-white">
+            <table className="min-w-full">
+              <thead className="bg-[#005B2F] !text-white !bg-[#005B2F]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                     NO
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                    JENIS
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                    WAKTU
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                    NOMOR & TANGGAL<br />DITETAPKAN
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                    TENTANG
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                    TANGGAL
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                    NOMOR
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                     AKSI
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                    USER
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                    DETAIL PERUBAHAN
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {aktivitasDocuments.map((doc) => (
-                  <tr key={doc.no} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">{doc.no}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{doc.jenis}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {doc.nomorTanggalDitetapkan}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{doc.tentang}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{doc.tanggal}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{doc.nomor}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-1.5">
-                        {/* View Button */}
-                        <button
-                          onClick={() => handleView(doc)}
-                          className="bg-[#DC2626] hover:bg-[#B91C1C] text-white p-1.5 rounded transition-colors"
-                          title="View"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        </button>
-                        {/* Download Button */}
-                        <button
-                          onClick={() => handleDownload(doc)}
-                          className="bg-[#2D5F2E] hover:bg-[#234a23] text-white p-1.5 rounded transition-colors"
-                          title="Download"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {activities.map((activity) => (
+                  <tr key={activity.no} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-900">{activity.no}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{activity.waktu}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{activity.aksi}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{activity.user}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{activity.detailPerubahan}</td>
                   </tr>
                 ))}
-                {/* Empty rows */}
-                <tr className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-300" colSpan={7}>4</td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-300" colSpan={7}>5</td>
-                </tr>
               </tbody>
             </table>
           </div>

@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/shared/ui/button"
+import { Eye, Download, Edit3, Archive } from "lucide-react"
+
 import { useState } from "react";
 
 interface Activity {
@@ -38,7 +41,7 @@ export default function AktivitasPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white p-6 md:p-8 lg:p-12">
+    <div className="space-y-8">
       {/* Aktivitas Card & Search Bar - Side by Side */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 mb-8">
         {/* Aktivitas Card */}
@@ -70,7 +73,7 @@ export default function AktivitasPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button className="bg-[#2D5F2E] hover:bg-[#234a23] text-white px-5 py-1.5 rounded-full font-medium text-sm transition-colors">
+          <button className="bg-green-700 hover:bg-green-800 text-white px-5 py-1.5 rounded-full font-medium text-sm transition-colors">
             Search
           </button>
         </div>
@@ -79,7 +82,7 @@ export default function AktivitasPage() {
       {/* Activities Table */}
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <table className="min-w-full">
-          <thead className="bg-[#2D5F2E] text-white">
+          <thead className="bg-[#005B2F] !text-white !bg-[#005B2F]">
             <tr>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                 NO
