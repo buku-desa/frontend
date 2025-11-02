@@ -59,6 +59,7 @@ export default function AdminPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // <-- 1. STATE BARU DITAMBAHKAN
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
 
   // Handler functions
@@ -267,7 +268,11 @@ export default function AdminPage() {
 
       {/* Scan Dokumen Button and Search */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-8">
-        <button className="bg-green-700 hover:bg-green-800 text-white px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium text-sm whitespace-nowrap transition-colors">
+        {/* 2. TOMBOL DIHUBUNGKAN */}
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-green-700 hover:bg-green-800 text-white px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium text-sm whitespace-nowrap transition-colors"
+        >
           <span className="text-xl font-bold">+</span> Tambah Dokumen
         </button>
         <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-full px-5 py-2">
@@ -554,7 +559,7 @@ export default function AdminPage() {
       {isEditModalOpen && selectedDoc && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg w-full max-w-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">UPLOAD DOKUMEN</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">EDIT DOKUMEN</h3> 
             <form className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-600 mb-2">Pilih Dokumen</label>
@@ -627,6 +632,87 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      {/* 3. MODAL TAMBAH BARU DITAMBAHKAN */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-lg p-6">
+            {/* Judul diubah */}
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">TAMBAH DOKUMEN BARU</h3>
+            <form className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">Pilih Dokumen</label>
+                <div className="border border-gray-300 rounded-lg p-3 flex items-center justify-between">
+                  <span className="text-gray-500 text-sm">Pilih Dokumen</span>
+                  <span className="bg-red-100 text-red-600 px-3 py-1 rounded text-xs font-medium">PDF</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">JENIS</label>
+                <input
+                  type="text"
+                  // defaultValue dihapus
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
+                  placeholder="Contoh: Peraturan"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">NOMOR & TANGGAL DITETAPKAN</label>
+                <input
+                  type="text"
+                  // defaultValue dihapus
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
+                  placeholder="Contoh: 01 Mei 2025"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">TENTANG</label>
+                <input
+                  type="text"
+                  // defaultValue dihapus
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
+                  placeholder="Contoh: Peraturan Desa tentang..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">NOMOR</label>
+                <input
+                  type="text"
+                  // defaultValue dihapus
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
+                  placeholder="Contoh: 07"
+                />
+              </div>
+
+              <div className="flex gap-4 justify-center pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)} // Menggunakan setIsAddModalOpen
+                  className="px-8 py-2 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-full font-medium transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    alert("Dokumen berhasil ditambahkan!"); // Logika diubah
+                    setIsAddModalOpen(false);
+                  }}
+                  className="px-8 py-2 bg-[#2D5F2E] hover:bg-[#234a23] text-white rounded-full font-medium transition-colors"
+                >
+                  Simpan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
+

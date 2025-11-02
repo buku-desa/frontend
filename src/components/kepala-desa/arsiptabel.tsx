@@ -117,7 +117,7 @@ export default function TabelArsip({ documents }: TabelArsipProps) {
                                     <div className="flex gap-2">
                                         <Button
                                             size="sm"
-                                            className="bg-red-600 hover:bg-red-700 text-white p-2 h-auto"
+                                            className="bg-zinc-600 hover:bg-zinc-500 text-white p-2 h-auto"
                                             onClick={() => handleViewDocument(doc)}
                                         >
                                             <Eye size={18} />
