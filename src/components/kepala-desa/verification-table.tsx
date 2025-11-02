@@ -128,14 +128,14 @@ export function VerificationTable({ documents, isDocumentPage = false, onVerify,
                 <div className="flex gap-2 items-center justify-center">
                     <Button
                         size="sm"
-                        className="bg-red-600 hover:bg-red-700 text-white p-2 h-auto"
+                        className="bg-zinc-600 hover:bg-zinc-500 text-white p-2 h-auto"
                         onClick={() => handleViewClick(doc)}
                     >
                         <Eye size={18} />
                     </Button>
                     <Button
                         size="sm"
-                        className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
+                        className="bg-green-800 hover:bg-green-700 text-white p-2 h-auto"
                         onClick={() => handleDownloadClick(doc.id)}
                     >
                         <Download size={18} />

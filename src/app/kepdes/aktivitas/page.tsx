@@ -48,7 +48,7 @@ export default function AktivitasPage() {
 
     return (
 
-        <main className="min-h-screen bg-gray-50 py-12 px-8">
+        <main className="space-y-8">
 
             {/* Header Card & Search */}
             <div className="flex flex-wrap justify-between items-center gap-3 mb-12">
