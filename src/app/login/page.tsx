@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -32,152 +30,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-[#E6F4E6] shadow-sm sticky top-0 z-30">
-        <div className="flex items-center justify-between px-6 py-3">
-          {/* Hamburger Menu - SELALU TERLIHAT */}
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="text-black hover:text-gray-700"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-
-          {/* Center Navigation */}
-          <nav className="flex items-center gap-8 mx-auto">
-            <Link
-              href="/admin"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-            >
-              Beranda
-            </Link>
-            <Link
-              href="/dokumen"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-            >
-              Dokumen
-            </Link>
-            <Link
-              href="/arsip"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-            >
-              Arsip
-            </Link>
-            <Link
-              href="/aktivitas"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-            >
-              Log Aktivitas
-            </Link>
-          </nav>
-
-          {/* Log in Admin Button */}
-          <Link
-            href="/login"
-            className="bg-[#2D5F2E] hover:bg-[#234a23] text-white px-5 py-1.5 rounded-full text-sm font-medium transition-colors"
-          >
-            Log in Admin
-          </Link>
-        </div>
-      </header>
-
-      {/* Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed left-0 top-0 w-64 h-screen bg-white border-r border-gray-200 overflow-y-auto z-50 transform transition-transform duration-300 ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Menu</h2>
-            <button
-              onClick={() => setIsSidebarOpen(false)}
-              className="text-gray-600 hover:text-gray-800"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-          <nav>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  <span className="text-xl">📊</span>
-                  <span className="font-medium">Dashboard</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/dokumen"
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  <span className="text-xl">📄</span>
-                  <span className="font-medium">Dokumen</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/arsip"
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  <span className="text-xl">🗄️</span>
-                  <span className="font-medium">Arsip</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/aktivitas"
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  <span className="text-xl">🕒</span>
-                  <span className="font-medium">Log Aktivitas</span>
-                </Link>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </aside>
-
       {/* Main Content - Login Form */}
-      <main className="flex items-center justify-center min-h-[calc(100vh-64px)] px-4 py-12">
+      <main className="flex items-center justify-center min-h-screen px-4 py-12">
         <div className="w-full max-w-md">
           {/* Title */}
           <h1 className="text-4xl font-bold text-center mb-12 text-gray-900">

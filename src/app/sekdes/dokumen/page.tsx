@@ -91,10 +91,11 @@ export default function DokumenPage() {
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Dokumen Card */}
-      <div className="mb-8">
-        <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full max-w-md">
+    <div className="min-h-screen bg-white p-6 md:p-8 lg:p-12">
+      {/* Dokumen Card & Search Bar - Side by Side */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 mb-8">
+        {/* Dokumen Card */}
+        <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full lg:w-auto lg:min-w-[320px]">
           <div className="bg-black rounded-lg p-3 flex-shrink-0">
             <svg
               className="w-10 h-10 text-white"
@@ -114,10 +115,8 @@ export default function DokumenPage() {
             <p className="text-sm text-gray-600">Total : 104</p>
           </div>
         </div>
-      </div>
 
-      {/* Search Bar - SAMAIN DENGAN ARSIP DAN AKTIVITAS */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-8">
+        {/* Search Bar */}
         <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-full px-5 py-2">
           <input
             type="text"
