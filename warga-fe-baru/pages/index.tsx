@@ -7,17 +7,25 @@ import Hero from '../src/components/warga/Hero'
 import SearchBar from '../src/components/warga/SearchBar'
 import BeritaCard from '../src/components/warga/BeritaCard'
 import BukuTable from '../src/components/warga/BukuTable'
+import bukuData from '../src/data/bukuData'
 
 const mockBerita = Array.from({ length: 5 }).map((_, i) => ({
   id: i + 1,
   title: `Peraturan Kalurahan ${i + 2021}`,
 }))
 
-const mockRows = Array.from({ length: 5 }).map((_, i) => ({
-  no: i + 1,
-  judul: `Peraturan Kalurahan ${i + 1} tentang RKP Desa Tahun 2022`,
+const extractYear = (value: string) => {
+  const match = value.match(/(\d{4})\b/)
+  return match ? Number(match[1]) : new Date().getFullYear()
+}
+
+const tableRows = bukuData.slice(0, 5).map((doc, index) => ({
+  no: index + 1,
+  judul: doc.title,
   jenis: 'Peraturan',
-  tahun: 2022 + (i % 3),
+  tahun: extractYear(doc.date),
+  viewHref: `/buku-lembaran/${doc.id}`,
+  downloadHref: doc.pdfUrl ? encodeURI(doc.pdfUrl) : undefined,
 }))
 
 const Home: NextPage = () => {
@@ -59,7 +67,7 @@ const Home: NextPage = () => {
       <section className="max-w-6xl mx-auto px-4 mt-8">
         <h2 className="text-xl font-semibold">Buku Lembaran Desa</h2>
         <div className="mt-4 mb-10">
-          <BukuTable rows={mockRows} />
+          <BukuTable rows={tableRows} />
         </div>
       </section>
     </>

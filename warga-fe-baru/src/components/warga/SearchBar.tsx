@@ -13,12 +13,12 @@ export default function SearchBar({ value, onChange, onSearch, placeholder = "Ca
   }
 
   return (
-    <div className="max-w-2xl ml-2 mr-auto px-4 -mt-24 mb-16">
-      <div className="bg-white rounded-full shadow-md p-3 flex items-center gap-4">
+    <div className="max-w-4xl -mt-10 mb-14 px-2 mx-auto">
+      <div className="bg-white rounded-full shadow-lg p-4 flex items-center gap-4">
         {/* Left search button */}
         <button 
           onClick={onSearch}
-          className="bg-green-700 text-white rounded-full px-6 py-2 font-medium shadow-sm hover:bg-green-800 transition-colors"
+          className="bg-green-700 text-white rounded-full px-6 py-3 font-medium shadow-md hover:bg-green-800 transition-colors"
         >
           Search
         </button>
