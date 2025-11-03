@@ -49,15 +49,14 @@ export default function DokumenPage() {
         <main className="min-h-screen bg-gray-50">
             <div className="space-y-8" >
                 {/* 🔹 Baris atas: tiga item sejajar */}
-                <div className="grid md:grid-cols-3 gap-0 mb-12">
-
-
+                <div className="flex flex-col md:flex-row gap-6">
                     <DocumentCard />
                     <JenisCard />
+                </div>
+                <div>
                     <SearchBar
                         onSearch={setSearchQuery}
                         value={searchQuery}
-
                     />
                 </div>
 

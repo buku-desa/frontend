@@ -93,7 +93,7 @@ export default function TabelArsip({ documents }: TabelArsipProps) {
             <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                     <thead>
-                        <tr className="bg-[#005B2F] text-white">
+                        <tr className="bg-green-800 text-white">
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">JENIS</th>
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR & TANGGAL DITETAPKAN</th>
@@ -117,16 +117,15 @@ export default function TabelArsip({ documents }: TabelArsipProps) {
                                     <div className="flex gap-2">
                                         <Button
                                             size="sm"
-                                            className="bg-zinc-600 hover:bg-zinc-500 text-white p-2 h-auto"
+                                            className="bg-green-100 hover:bg-green-200 text-green-700 p-2 h-auto"
                                             onClick={() => handleViewDocument(doc)}
                                         >
                                             <Eye size={18} />
                                         </Button>
                                         <Button
                                             size="sm"
-                                            className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
-                                            onClick={() => handleDownloadClick(doc.id)}
-                                        >
+                                            className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
+                                            onClick={() => handleDownloadClick(doc.id)}>
                                             <Download size={18} />
                                         </Button>
                                     </div>

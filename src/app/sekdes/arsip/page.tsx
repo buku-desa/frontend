@@ -71,18 +71,13 @@ export default function ArsipPage() {
       {/* Arsip Card & Search Bar */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 mb-8">
         <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full lg:w-auto lg:min-w-[320px]">
-          <div className="bg-black rounded-lg p-3 flex-shrink-0">
+          <div className="bg-green-100 rounded-lg p-3 shrink-0">
             <svg
-              className="w-10 h-10 text-white"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+              className="w-8 h-8 text-green-600"
+              fill="currentColor"
               viewBox="0 0 24 24"
-            >
-              <rect x="3" y="3" width="18" height="5" rx="1" />
-              <rect x="3" y="10" width="18" height="11" rx="1" />
-              <line x1="8" y1="14" x2="16" y2="14" />
-              <line x1="8" y1="17" x2="16" y2="17" />
+                        >
+              <path d="M3 4h18v4H3V4zm0 6h18v10H3V10zm4 2v6h10v-6H7z" />
             </svg>
           </div>
           <div>
@@ -110,14 +105,14 @@ export default function ArsipPage() {
       <div className="overflow-x-auto overflow-y-auto max-h-fit bg-white border border-gray-200 rounded-lg">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-[#005B2F] text-white">
+            <tr className="bg-green-800 text-white">
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">JENIS</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR & TANGGAL DITETAPKAN</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TENTANG</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TANGGAL</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR</th>
-              <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-center">AKSI</th>
+              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
             </tr>
           </thead>
           <tbody>
@@ -133,18 +128,19 @@ export default function ArsipPage() {
                   <div className="flex gap-2 items-center justify-center">
                     <Button
                       size="sm"
+                      className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
+                      onClick={() => handleRestore(doc)}
+                    >
+                      <RotateCcw size={18} />
+                    </Button>
+                    <Button
+                      size="sm"
                       className="bg-red-600 hover:bg-red-700 text-white p-2 h-auto"
                       onClick={() => handleDelete(doc)}
                     >
                       <Trash2 size={18} />
                     </Button>
-                    <Button
-                      size="sm"
-                      className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
-                      onClick={() => handleRestore(doc)}
-                    >
-                      <RotateCcw size={18} />
-                    </Button>
+                    
                   </div>
                 </td>
               </tr>

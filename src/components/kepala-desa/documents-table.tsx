@@ -23,7 +23,7 @@ export function DocumentsTable({ documents }: DocumentsTableProps) {
             <table className="w-full border-collapse">
                 <thead>
 
-                    <tr className="bg-[#005B2F] !text-white !bg-[#005B2F]">
+                    <tr className="bg-green-800 text-white">
 
                         <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
                         <th className="border border-gray-300 px-4 py-3 text-left font-semibold">JENIS</th>
@@ -45,10 +45,10 @@ export function DocumentsTable({ documents }: DocumentsTableProps) {
                             <td className="border border-gray-300 px-4 py-3">{doc.nomor}</td>
                             <td className="border border-gray-300 px-4 py-3">
                                 <div className="flex gap-2">
-                                    <Button size="sm" className="bg-zinc-600 hover:bg-zinc-500 text-white p-2 h-auto">
+                                    <Button size="sm" className="bg-green-200 hover:bg-green-100 text-green-700 p-2 h-auto">
                                         <Eye size={18} />
                                     </Button>
-                                    <Button size="sm" className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto">
+                                    <Button size="sm" className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto">
 
                                         <Download size={18} />
                                     </Button>

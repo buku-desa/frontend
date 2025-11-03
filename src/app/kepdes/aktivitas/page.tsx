@@ -53,10 +53,10 @@ export default function AktivitasPage() {
             {/* Header Card & Search */}
             <div className="flex flex-wrap justify-between items-center gap-3 mb-12">
                 {/* Card Aktivitas */}
-                <div className="bg-white border border-gray-300 shadow-md rounded-2xl p-4 flex items-center gap-3">
-                    <div className="bg-[black] rounded-xl p-3 flex items-center justify-center">
+                <div className="bg-white border-2 shadow-md rounded-2xl p-4 flex items-center gap-3">
+                    <div className="bg-green-50 rounded-xl p-3 flex items-center justify-center">
                         <svg
-                            className="w-8 h-8 text-white"
+                            className="w-8 h-8 text-green-600"
                             fill="currentColor"
                             viewBox="0 0 24 24"
                         >
@@ -84,7 +84,7 @@ export default function AktivitasPage() {
             <div className="bg-white rounded-2xl shadow-md overflow-x-auto">
                 <table className="w-full border-collapse">
                     <thead>
-                        <tr className="bg-[#005B2F] text-white">
+                        <tr className="bg-green-800 text-white">
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">WAKTU</th>
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
