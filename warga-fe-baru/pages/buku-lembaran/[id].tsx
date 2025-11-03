@@ -4,11 +4,45 @@ import { useRouter } from 'next/router'
 import Header from '../../src/components/warga/Header'
 import bukuData from '../../src/data/bukuData'
 
+function normalizeKey(s?: string | number) {
+  if (s === undefined || s === null) return ''
+  return String(s)
+    .toLowerCase()
+    .replace(/\.[a-z0-9]+$/i, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+function resolveDoc(param?: string | string[] | number) {
+  if (!param) return undefined
+  const p = Array.isArray(param) ? param[0] : String(param)
+
+  const leading = p.split('-')[0]
+  if (/^\d+$/.test(leading)) {
+    const byId = bukuData.find((b) => String(b.id) === leading)
+    if (byId) return byId
+  }
+
+  if (/^\d+$/.test(p)) {
+    const byId = bukuData.find((b) => String(b.id) === p)
+    if (byId) return byId
+  }
+
+  const key = normalizeKey(p)
+  const byTitle = bukuData.find((b) => normalizeKey(b.title) === key)
+  if (byTitle) return byTitle
+
+  const byPdfName = bukuData.find((b) => normalizeKey((b.pdfUrl || '').split('/').pop()) === key)
+  if (byPdfName) return byPdfName
+
+  return bukuData.find((b) => normalizeKey(b.title).includes(key) || (b.pdfUrl || '').toLowerCase().includes(p.toLowerCase()))
+}
+
 const BukuDetail: NextPage = () => {
   const router = useRouter()
   const { id } = router.query
 
-  const doc = bukuData.find((b) => String(b.id) === String(id))
+  const doc = resolveDoc(id)
 
   if (!doc) {
     return (
@@ -41,7 +75,7 @@ const BukuDetail: NextPage = () => {
           {/* Embed PDF using iframe; external URL is stored in data */}
           <div style={{ height: '720px' }}>
             <iframe
-              src={doc.pdfUrl}
+              src={encodeURI(doc.pdfUrl)}
               title={doc.title}
               width="100%"
               height="100%"
