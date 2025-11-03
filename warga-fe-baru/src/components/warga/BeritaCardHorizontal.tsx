@@ -1,21 +1,21 @@
+import { ReactNode } from 'react'
+
 type Props = {
-  title: string
+  title: string | ReactNode
   date: string
-  description: string
+  description: string | ReactNode
   isHighlighted?: boolean
 }
 
 export default function BeritaCardHorizontal({ title, date, description, isHighlighted = false }: Props) {
   return (
-    <div className={`bg-white rounded-lg shadow-md p-4 flex gap-4 items-start`}>
-      {/* Image placeholder */}
-      <div className="w-24 h-24 bg-amber-100 rounded-md flex-shrink-0 flex items-center justify-center">
-        <svg className="w-12 h-12 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      </div>
+   <div className="bg-white rounded-lg shadow-md p-6 flex gap-6 items-start hover:shadow-lg transition snap-start min-w-[20rem]">
+        {/* Image placeholder */}
+        <div className="w-32 h-40 bg-green-700 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden">
+          <img src="/document.png" alt="document" className="w-16 h-16 object-contain" />
+        </div>
       
-      {/* Content */}
+  {/* Content */}
       <div className="flex-1">
         <h3 className="text-base font-bold text-gray-900">{title}</h3>
         <div className="flex items-center gap-2 mt-1 text-xs text-emerald-600">
