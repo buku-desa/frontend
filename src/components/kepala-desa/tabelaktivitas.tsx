@@ -32,7 +32,7 @@ export default function TabelAktivitas({ activities }: TabelAktivitasProps) {
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md">
             <table className="w-full border-collapse">
                 <thead>
-                    <tr className="bg-[#005B2F] text-white">
+                    <tr className="bg-green-800 text-white">
                         <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
                         <th className="border border-gray-300 px-4 py-3 text-left font-semibold">WAKTU</th>
                         <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>

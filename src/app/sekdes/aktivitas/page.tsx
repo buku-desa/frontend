@@ -46,16 +46,15 @@ export default function AktivitasPage() {
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 mb-8">
         {/* Aktivitas Card */}
         <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full lg:w-auto lg:min-w-[320px]">
-          <div className="bg-black rounded-lg p-3 flex-shrink-0">
+          <div className="bg-green-50 rounded-lg p-3 shrink-0">
             <svg
-              className="w-10 h-10 text-white"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+              className="w-8 h-8 text-green-600"
+              fill="currentColor"
               viewBox="0 0 24 24"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
+                        >
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+              <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+              <path d="M16 2h-2v4h2V2zm-6 0H8v4h2V2z" />
             </svg>
           </div>
           <div>
@@ -82,7 +81,7 @@ export default function AktivitasPage() {
       {/* Activities Table */}
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <table className="min-w-full">
-          <thead className="bg-[#005B2F] !text-white !bg-[#005B2F]">
+          <thead className="bg-green-800 text-white">
             <tr>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                 NO

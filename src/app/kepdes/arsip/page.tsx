@@ -93,11 +93,10 @@ export default function ArsipPage() {
 
             {/* Header Card & Search */}
             <div className="flex flex-wrap justify-between items-center gap-3 mb-12">
-                <div className="bg-white border border-gray-300 shadow-md rounded-2xl p-4 flex items-center gap-3 ">
-
-                    <div className="bg-[black] rounded-xl p-3 flex items-center justify-center">
+                <div className="bg-white border-2 shadow-md rounded-2xl p-4 flex items-center gap-3">
+                    <div className="bg-green-50 rounded-xl p-3 flex items-center justify-center">
                         <svg
-                            className="w-8 h-8 text-white"
+                            className="w-8 h-8 text-green-600"
                             fill="currentColor"
                             viewBox="0 0 24 24"
                         >

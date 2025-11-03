@@ -3,6 +3,7 @@
 import { Button } from "@/components/shared/ui/button"
 import { Eye, Download, Edit3, Archive } from "lucide-react"
 import { useState } from "react";
+import { FileText } from "lucide-react";
 
 interface Document {
   no: number;
@@ -98,11 +99,8 @@ export default function DokumenPage() {
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 mb-8">
         {/* Dokumen Card */}
         <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full lg:w-auto lg:min-w-[320px]">
-          <div className="bg-black rounded-lg p-3 flex-shrink-0">
-            <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-              <path d="M14 2v6h6M10 9h4M10 13h4M10 17h4" stroke="white" strokeWidth="0.5" />
-            </svg>
+          <div className="bg-green-50 rounded-lg p-3 shrink-0">
+            <FileText className="w-10 h-10 text-green-600" strokeWidth={1.5} />
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Dokumen</h3>
@@ -153,14 +151,14 @@ export default function DokumenPage() {
                   <div className="flex gap-2 items-center justify-center">
                     <Button
                       size="sm"
-                      className="bg-zinc-600 hover:bg-zinc-500 text-white p-2 h-auto"
+                      className="bg-green-100 hover:bg-green-200 text-green-700 p-2 h-auto"
                       onClick={() => handleView(doc)}
                     >
                       <Eye size={16} />
                     </Button>
                     <Button
                       size="sm"
-                      className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
+                      className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
                       onClick={() => handleDownload(doc)}
                     >
                       <Download size={16} />

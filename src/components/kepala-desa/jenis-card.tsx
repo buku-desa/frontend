@@ -30,11 +30,10 @@ export function JenisCard() {
             {/* 🔹 Kartu Jenis Peraturan */}
             <div
                 onClick={() => setShowPopup(true)}
-                className="border-2 border-gray-400 rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow bg-white w-fit"
-            >
+                className="border-2 rounded-2xl p-4 cursor-pointer transition-shadow shadow-md hover:shadow-lg bg-white w-fit">
                 <div className="flex items-center gap-4">
-                    <div className="bg-black p-2 rounded-lg flex-shrink-0">
-                        <FileText className="text-white" size={32} />
+                    <div className="bg-green-50 p-2 rounded-lg shrink-0">
+                        <FileText className="text-green-600" size={32} />
                     </div>
                     <div>
                         <h3 className="text-xl font-bold text-gray-900">Jenis Peraturan Desa</h3>

@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/shared/ui/button"
 import { Eye, Download, Edit3, Archive } from "lucide-react"
+import { FileText } from "lucide-react";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -207,15 +208,8 @@ export default function AdminPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Dokumen Card */}
         <Link href="/sekdes/dokumen" className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
-          <div className="bg-black rounded-lg p-3 flex-shrink-0">
-            <svg
-              className="w-10 h-10 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-              <path d="M14 2v6h6M10 9h4M10 13h4M10 17h4" stroke="white" strokeWidth="0.5" />
-            </svg>
+          <div className="bg-green-50 rounded-lg p-3 shrink-0">
+            <FileText className="w-10 h-10 text-green-600" strokeWidth={1.5} />
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Dokumen</h3>
@@ -225,18 +219,12 @@ export default function AdminPage() {
 
         {/* Arsip Card */}
         <Link href="/sekdes/arsip" className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
-          <div className="bg-black rounded-lg p-3 flex-shrink-0">
+          <div className="bg-green-50 rounded-lg p-3 shrink-0">
             <svg
-              className="w-10 h-10 text-white"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <rect x="3" y="3" width="18" height="5" rx="1" />
-              <rect x="3" y="10" width="18" height="11" rx="1" />
-              <line x1="8" y1="14" x2="16" y2="14" />
-              <line x1="8" y1="17" x2="16" y2="17" />
+                className="w-8 h-8 text-green-600"
+                fill="currentColor"
+                viewBox="0 0 24 24">
+                <path d="M3 4h18v4H3V4zm0 6h18v10H3V10zm4 2v6h10v-6H7z" />
             </svg>
           </div>
           <div>
@@ -247,16 +235,15 @@ export default function AdminPage() {
 
         {/* Aktivitas Card */}
         <Link href="/sekdes/aktivitas" className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
-          <div className="bg-black rounded-lg p-3 flex-shrink-0">
+          <div className="bg-green-50 rounded-lg p-3 shrink-0">
             <svg
-              className="w-10 h-10 text-white"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+              className="w-8 h-8 text-green-600"
+              fill="currentColor"
               viewBox="0 0 24 24"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
+                        >
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+              <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+              <path d="M16 2h-2v4h2V2zm-6 0H8v4h2V2z" />
             </svg>
           </div>
           <div>
@@ -293,7 +280,7 @@ export default function AdminPage() {
       <div className="bg-white rounded-lg overflow-hidden border border-gray-200 mb-12">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px]">
-            <thead className="bg-[#005B2F] !text-white !bg-[#005B2F]">
+            <thead className="bg-green-800 text-white">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
                   NO
@@ -334,14 +321,14 @@ export default function AdminPage() {
                       {/* View Button */}
                       <Button
                         size="sm"
-                        className="bg-zinc-600 hover:bg-zinc-500 text-white p-2 h-auto"
+                        className="bg-green-100 hover:bg-green-200 text-green-700 p-2 h-auto"
                         onClick={() => handleView(doc)}
                       >
                         <Eye size={16} />
                       </Button>
                       <Button
                         size="sm"
-                        className="!bg-[#005B2F] hover:!bg-[#004626] text-white p-2 h-auto"
+                        className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
                         onClick={() => handleDownload(doc)}
                       >
                         <Download size={16} />
@@ -377,7 +364,7 @@ export default function AdminPage() {
         <div className="bg-white rounded-lg overflow-hidden border border-gray-200">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
-              <thead className="bg-[#005B2F] !text-white !bg-[#005B2F]">
+              <thead className="bg-green-800 text-white">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
                     NO
@@ -434,7 +421,7 @@ export default function AdminPage() {
         <div className="bg-white rounded-lg overflow-hidden border border-gray-200">
           <div className="overflow-x-auto">
             <table className="min-w-full">
-              <thead className="bg-[#005B2F] !text-white !bg-[#005B2F]">
+              <thead className="bg-green-800 text-white">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                     NO
@@ -521,7 +508,7 @@ export default function AdminPage() {
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-8 py-2 bg-[#2D5F2E] hover:bg-[#234a23] text-white rounded-full font-medium transition-colors"
+                className="px-8 py-2 bg-green-700 hover:bg-green-800 text-white rounded-full font-medium transition-colors"
               >
                 Ya
               </button>
@@ -623,7 +610,7 @@ export default function AdminPage() {
                     alert("Dokumen berhasil diupdate!");
                     setIsEditModalOpen(false);
                   }}
-                  className="px-8 py-2 bg-[#2D5F2E] hover:bg-[#234a23] text-white rounded-full font-medium transition-colors"
+                  className="px-8 py-2 bg-green-700 hover:bg-green-800 text-white rounded-full font-medium transition-colors"
                 >
                   Simpan
                 </button>
@@ -702,7 +689,7 @@ export default function AdminPage() {
                     alert("Dokumen berhasil ditambahkan!"); // Logika diubah
                     setIsAddModalOpen(false);
                   }}
-                  className="px-8 py-2 bg-[#2D5F2E] hover:bg-[#234a23] text-white rounded-full font-medium transition-colors"
+                  className="px-8 py-2 bg-green-700 hover:bg-green-800 text-white rounded-full font-medium transition-colors"
                 >
                   Simpan
                 </button>

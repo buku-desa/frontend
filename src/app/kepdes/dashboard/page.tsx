@@ -8,6 +8,7 @@ import { DocumentChart } from "@/components/kepala-desa/document-chart"
 import { useDocuments } from "@/lib/contexts/documents-context"
 import ArsipTabel from "@/components/kepala-desa/arsiptabel"
 import TabelAktivitas from "@/components/kepala-desa/tabelaktivitas"
+import { JenisCard } from "@/components/kepala-desa/jenis-card"
 
 import { useState } from "react"
 
@@ -71,8 +72,9 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="space-y-8">
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-[auto_auto_1fr] gap-6 mb-12 items-center">
           <DocumentCard />
+          <JenisCard />
           <SearchBar onSearch={setSearchQuery} value={searchQuery} />
         </div>
 
