@@ -1,110 +1,106 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// import Link from "next/link"; // Dihapus untuk memperbaiki error
-// import { useRouter } from "next/navigation"; // Dihapus untuk memperbaiki error
+import { login } from "@/lib/api";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(""); // 1. State baru untuk pesan error
-  // const router = useRouter(); // Dihapus untuk memperbaiki error
+  const [error, setError] = useState("");
 
-  // --- State untuk Typewriter (Sama seperti page.tsx) ---
+  // --- State untuk Typewriter ---
   const [typedSimba, setTypedSimba] = useState("");
   const fullSimba = "SIMBADES";
   const [isDeleting, setIsDeleting] = useState(false);
   const [typeSpeed, setTypeSpeed] = useState(150);
-  // --- Akhir State Typewriter ---
 
-  // --- Logika Typewriter (Sama seperti page.tsx) ---
+  // --- Logika Typewriter ---
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
     const handleTyping = () => {
       if (isDeleting) {
-        // Mode menghapus
         setTypedSimba(prev => prev.substring(0, prev.length - 1));
-        setTypeSpeed(prev => Math.max(120, prev - 10)); // Mempercepat hapus
+        setTypeSpeed(prev => Math.max(120, prev - 10));
       } else {
-        // Mode menulis
         setTypedSimba(prev => fullSimba.substring(0, prev.length + 1));
-        setTypeSpeed(prev => Math.max(120, prev - 10)); // Mempercepat tulis
+        setTypeSpeed(prev => Math.max(120, prev - 10));
       }
     };
 
     const currentText = typedSimba;
 
     if (!isDeleting && currentText.length === fullSimba.length) {
-      // Selesai menulis, tunggu sebentar lalu mulai menghapus
-      timeoutId = setTimeout(() => setIsDeleting(true), 5000); // Tunggu 5 detik
+      timeoutId = setTimeout(() => setIsDeleting(true), 5000);
     } else if (isDeleting && currentText.length === 0) {
-      // Selesai menghapus, tunggu sebentar lalu mulai menulis lagi
       setIsDeleting(false);
-      timeoutId = setTimeout(() => setTypeSpeed(150), 500); // Tunggu sebentar sebelum mulai menulis lagi
+      timeoutId = setTimeout(() => setTypeSpeed(150), 500);
     } else {
-      // Lanjutkan mengetik/menghapus
       timeoutId = setTimeout(handleTyping, typeSpeed);
     }
 
     return () => clearTimeout(timeoutId);
   }, [typedSimba, isDeleting, typeSpeed, fullSimba]);
-  // --- Akhir Logika Typewriter ---
 
-  // --- 2. Logika Login (Diperbarui dengan Akun Dummy) ---
+  // --- Logika Login dengan Backend API ---
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(""); // Hapus error sebelumnya
+    setError("");
 
-    // Simulate login process
-    // --- BLOK YANG DIPERBAIKI ---
-    setTimeout(() => {
-      // --- Akun Dummy ---
-      if (username === "kepdes" && password === "123") {
-        // Login sebagai Kepala Desa
-        localStorage.setItem('authToken', 'dummy-token-kepdes');
-        localStorage.setItem('userRole', 'kepdes');
-        localStorage.setItem('username', 'kepdes'); // atau nama lengkap
+    try {
+      // Call backend API
+      const response = await login({ username, password });
+
+      console.log("Login response:", response);
+
+      // Redirect berdasarkan role
+      if (response.data.role === "kepdes") {
         window.location.href = "/kepdes/dashboard";
-
-      } else if (username === "sekdes" && password === "123") {
-        // Login sebagai Sekretaris Desa
-        localStorage.setItem('authToken', 'dummy-token-sekdes');
-        localStorage.setItem('userRole', 'sekdes');
-        localStorage.setItem('username', 'sekdes'); // atau nama lengkap
+      } else if (response.data.role === "sekdes") {
         window.location.href = "/sekdes/dashboard";
-      
       } else {
-        // Login Gagal
-        setError("Username atau password salah.");
-        setIsLoading(false); // Berhenti loading jika gagal
+        window.location.href = "/beranda";
       }
-    }, 1000);
-  }; // <-- Kurung kurawal penutup ditambahkan
-  // --- Akhir Logika Login ---
+    } catch (err: any) {
+      console.error("Login error:", err);
+
+      // Handle error messages
+      if (err.response?.status === 401) {
+        setError("Username atau password salah");
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.code === "ERR_NETWORK") {
+        setError("Tidak dapat terhubung ke server. Pastikan backend sudah berjalan.");
+      } else {
+        setError("Terjadi kesalahan saat login. Silakan coba lagi.");
+      }
+
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex">
       {/* BAGIAN KIRI - White Box Full Height */}
       <div className="w-full lg:w-[45%] bg-white flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          
-          {/* Logo/Icon (DISAMAKAN DENGAN page.tsx) */}
+
+          {/* Logo/Icon */}
           <div className="mb-6">
             <div className="w-20 h-20 mx-auto bg-green-600 rounded-full flex items-center justify-center">
-              <svg 
+              <svg
                 className="w-12 h-12 text-white"
-                fill="none" 
-                stroke="currentColor" 
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                 />
               </svg>
             </div>
@@ -114,13 +110,13 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold text-center mb-2 text-gray-800">
             Log in
           </h1>
-          
-          {/* Subtitle (DISAMAKAN DENGAN page.tsx) */}
+
+          {/* Subtitle */}
           <p className="text-center text-gray-600 mb-8 text-lg">
             Portal Administrasi SIMBADES
           </p>
 
-          {/* 3. Tampilan Pesan Error */}
+          {/* Pesan Error */}
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4 text-sm" role="alert">
               <span className="block sm:inline">{error}</span>
@@ -217,24 +213,30 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Info Credentials untuk Testing */}
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-xs">
+            <p className="font-semibold text-blue-800 mb-1">Test Credentials:</p>
+            <p className="text-blue-700">Sekdes: <code className="bg-blue-100 px-1 rounded">sekdes</code> / <code className="bg-blue-100 px-1 rounded">password</code></p>
+            <p className="text-blue-700">Kepdes: <code className="bg-blue-100 px-1 rounded">kepdes</code> / <code className="bg-blue-100 px-1 rounded">password</code></p>
+          </div>
+
           {/* Back to Home Link */}
           <div className="mt-8 text-center">
-            {/* <Link> diganti menjadi <a> */}
-            <a 
-              href="/" 
+            <a
+              href="/"
               className="text-sm text-gray-600 hover:text-green-700 transition-colors inline-flex items-center gap-1"
             >
-              <svg 
-                className="w-4 h-4" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
               Kembali ke Halaman Portal
@@ -244,7 +246,7 @@ export default function LoginPage() {
       </div>
 
       {/* BAGIAN KANAN - Background Image Full Height */}
-      <div 
+      <div
         className="hidden lg:block lg:w-[55%] relative"
         style={{
           backgroundImage: 'url(/welcome/background.jpg)',
@@ -255,13 +257,12 @@ export default function LoginPage() {
       >
         {/* Overlay untuk contrast */}
         <div className="absolute inset-0 bg-black opacity-50"></div>
-        
-        {/* Teks di atas gambar (DENGAN TYPEWRITER) */}
+
+        {/* Teks di atas gambar */}
         <div className="relative z-10 h-full flex items-center justify-center p-12">
           <div className="text-center text-white">
             <h2 className="text-4xl font-bold mb-1 drop-shadow-lg min-h-[3.5rem]">
               {typedSimba}
-              {/* Kursor berkedip */}
               <span className="animate-pulse ml-1">|</span>
             </h2>
             <p className="text-xl drop-shadow-lg">
@@ -273,4 +274,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

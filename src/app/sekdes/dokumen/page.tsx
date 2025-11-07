@@ -1,97 +1,236 @@
-﻿"use client";
+"use client";
 
-import { Button } from "@/components/shared/ui/button"
-import { Eye, Download, Edit3, Archive } from "lucide-react"
-import { useState } from "react";
+import { Button } from "@/components/shared/ui/button";
+import { Eye, Download, Edit3, Archive, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { FileText } from "lucide-react";
-
-interface Document {
-  no: number;
-  jenis: string;
-  nomorTanggalDitetapkan: string;
-  tentang: string;
-  tanggal: string;
-  nomor: string;
-  pdfUrl?: string;
-}
+import { useState, useEffect } from "react";
+import {
+  getDocuments,
+  downloadDocument,
+  updateDocument,
+  type Document as APIDocument,
+} from "@/lib/api";
+import { createArchive } from "@/lib/api";
 
 export default function DokumenPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [documents, setDocuments] = useState<APIDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalDocuments, setTotalDocuments] = useState(0);
+  const perPage = 10;
+
+  // Filter
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [jenisFilter, setJenisFilter] = useState<string>("all");
+
+  // Modal states
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
   const [selectedPDF, setSelectedPDF] = useState<string>("");
   const [selectedTitle, setSelectedTitle] = useState<string>("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
+  const [selectedDoc, setSelectedDoc] = useState<APIDocument | null>(null);
 
-  // Handler functions
-  const handleView = (doc: Document) => {
-    if (doc.pdfUrl) {
-      setSelectedPDF(doc.pdfUrl);
-      setSelectedTitle(`${doc.jenis} - ${doc.tentang}`);
-      setIsPDFModalOpen(true);
-    } else {
-      alert(`View dokumen: ${doc.jenis} - Nomor ${doc.nomor}`);
+  // Form data for edit
+  const [formData, setFormData] = useState({
+    jenis_dokumen: "peraturan_desa" as const,
+    nomor_ditetapkan: "",
+    tanggal_ditetapkan: "",
+    tentang: "",
+    keterangan: "",
+    file_upload: null as File | null,
+  });
+
+  // Fetch documents
+  useEffect(() => {
+    fetchDocuments();
+  }, [currentPage, statusFilter, jenisFilter]);
+
+  // Live search with debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setCurrentPage(1);
+      fetchDocuments();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  const fetchDocuments = async () => {
+    try {
+      // Only show loading screen on initial page load
+      if (isInitialLoad) {
+        setLoading(true);
+      }
+      setError(null);
+
+      const params: any = {
+        per_page: perPage,
+        page: currentPage,
+      };
+
+      if (statusFilter !== "all") {
+        params.status = statusFilter;
+      }
+
+      if (jenisFilter !== "all") {
+        params.jenis_dokumen = jenisFilter;
+      }
+
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
+
+      const response = await getDocuments(params);
+      setDocuments(response.data);
+      setTotalDocuments(response.meta.total);
+      setTotalPages(Math.ceil(response.meta.total / perPage));
+
+      // Mark initial load as complete
+      if (isInitialLoad) {
+        setIsInitialLoad(false);
+      }
+    } catch (err: any) {
+      console.error("Error fetching documents:", err);
+      setError(err.response?.data?.message || "Gagal memuat dokumen");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDownload = (doc: Document) => {
+  // Handlers
+  const handleView = async (doc: APIDocument) => {
+    try {
+      setSelectedTitle(`${getJenisLabel(doc.jenis_dokumen)} - ${doc.tentang}`);
+      setIsPDFModalOpen(true);
+      setSelectedPDF(""); // Clear previous PDF
+
+      // Fetch PDF as blob using authenticated request
+      const blob = await downloadDocument(doc.id);
+      const pdfUrl = window.URL.createObjectURL(blob);
+      setSelectedPDF(pdfUrl);
+    } catch (err: any) {
+      console.error("Error loading PDF:", err);
+      alert(err.response?.data?.message || "Gagal memuat PDF");
+      setIsPDFModalOpen(false);
+    }
+  };
+
+  const handleDownload = (doc: APIDocument) => {
     setSelectedDoc(doc);
     setIsDownloadModalOpen(true);
   };
 
-  const confirmDownload = () => {
-    if (selectedDoc?.pdfUrl) {
-      window.open(selectedDoc.pdfUrl, '_blank');
+  const confirmDownload = async () => {
+    if (!selectedDoc) return;
+
+    try {
+      const blob = await downloadDocument(selectedDoc.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${selectedDoc.tentang}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Gagal mendownload dokumen");
+    } finally {
+      setIsDownloadModalOpen(false);
     }
-    setIsDownloadModalOpen(false);
   };
 
-  const handleEdit = (doc: Document) => {
+  const handleEdit = (doc: APIDocument) => {
     setSelectedDoc(doc);
+    setFormData({
+      jenis_dokumen: doc.jenis_dokumen,
+      nomor_ditetapkan: doc.nomor_ditetapkan || "",
+      tanggal_ditetapkan: doc.tanggal_ditetapkan || "",
+      tentang: doc.tentang,
+      keterangan: doc.keterangan || "",
+      file_upload: null,
+    });
     setIsEditModalOpen(true);
   };
 
-  const handleArchive = (doc: Document) => {
+  const handleSubmitEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDoc) return;
+
+    try {
+      await updateDocument(selectedDoc.id, formData);
+      alert("Dokumen berhasil diupdate!");
+      setIsEditModalOpen(false);
+      fetchDocuments();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Gagal mengupdate dokumen");
+    }
+  };
+
+  const handleArchive = (doc: APIDocument) => {
     setSelectedDoc(doc);
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
-    alert("Dokumen berhasil diarsipkan!");
-    setIsDeleteModalOpen(false);
+  const confirmArchive = async () => {
+    if (!selectedDoc) return;
+
+    try {
+      await createArchive({ id_dokumen: selectedDoc.id });
+      alert("Dokumen berhasil diarsipkan!");
+      setIsDeleteModalOpen(false);
+      fetchDocuments();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Gagal mengarsipkan dokumen");
+    }
   };
 
-  const documents: Document[] = [
-    {
-      no: 1,
-      jenis: "Peraturan",
-      nomorTanggalDitetapkan: "17 Agustus 2024",
-      tentang: "Peraturan",
-      tanggal: "17 Agustus 2024",
-      nomor: "01",
-      pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-    {
-      no: 2,
-      jenis: "Peraturan",
-      nomorTanggalDitetapkan: "17 Agustus 2024",
-      tentang: "Peraturan",
-      tanggal: "01 Maret 2025",
-      nomor: "02",
-      pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-    {
-      no: 3,
-      jenis: "Peraturan",
-      nomorTanggalDitetapkan: "17 Agustus 2024",
-      tentang: "Peraturan",
-      tanggal: "30 Juli 2025",
-      nomor: "03",
-      pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-  ];
+  const getJenisLabel = (jenis: string) => {
+    switch (jenis) {
+      case "peraturan_desa":
+        return "Peraturan Desa";
+      case "peraturan_kepala_desa":
+        return "Peraturan Kepala Desa";
+      case "peraturan_bersama_kepala_desa":
+        return "Peraturan Bersama Kepala Desa";
+      default:
+        return jenis;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const styles = {
+      Draft: "bg-yellow-100 text-yellow-800",
+      Disetujui: "bg-green-100 text-green-800",
+      Ditolak: "bg-red-100 text-red-800",
+      Arsip: "bg-gray-100 text-gray-800",
+    };
+    return styles[status as keyof typeof styles] || "bg-gray-100 text-gray-800";
+  };
+
+  if (loading && documents.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -104,24 +243,74 @@ export default function DokumenPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Dokumen</h3>
-            <p className="text-sm text-gray-600">Total : 104</p>
+            <p className="text-sm text-gray-600">Total : {totalDocuments}</p>
           </div>
         </div>
 
         {/* Search Bar */}
         <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-full px-5 py-2">
+          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
           <input
             type="text"
             placeholder="Cari judul, nomor, atau jenis dokumen"
             className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder:text-gray-500"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && fetchDocuments()}
           />
-          <button className="bg-green-700 hover:bg-green-800 text-white px-5 py-1.5 rounded-full font-medium text-sm transition-colors">
+          <button
+            onClick={fetchDocuments}
+            className="bg-green-700 hover:bg-green-800 text-white px-5 py-1.5 rounded-full font-medium text-sm transition-colors"
+          >
             Search
           </button>
         </div>
       </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Status:</label>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="all">Semua Status</option>
+            <option value="Draft">Draft</option>
+            <option value="Disetujui">Disetujui</option>
+            <option value="Ditolak">Ditolak</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Jenis Dokumen:</label>
+          <select
+            value={jenisFilter}
+            onChange={(e) => {
+              setJenisFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="all">Semua Jenis</option>
+            <option value="peraturan_desa">Peraturan Desa</option>
+            <option value="peraturan_kepala_desa">Peraturan Kepala Desa</option>
+            <option value="peraturan_bersama_kepala_desa">Peraturan Bersama Kepala Desa</option>
+          </select>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
 
       {/* Table */}
       <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -130,60 +319,111 @@ export default function DokumenPage() {
             <tr>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">NO</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">JENIS</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">NOMOR/TANGGAL DITETAPKAN</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                NOMOR/TANGGAL DITETAPKAN
+              </th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">TENTANG</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">TANGGAL</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">NOMOR</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">STATUS</th>
               <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">AKSI</th>
             </tr>
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            {documents.map((doc) => (
-              <tr key={doc.no} className="hover:bg-gray-50">
-                <td className="px-4 py-3 text-sm text-gray-900">{doc.no}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{doc.jenis}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{doc.nomorTanggalDitetapkan}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{doc.tentang}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{doc.tanggal}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{doc.nomor}</td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2 items-center justify-center">
-                    <Button
-                      size="sm"
-                      className="bg-green-100 hover:bg-green-200 text-green-700 p-2 h-auto"
-                      onClick={() => handleView(doc)}
-                    >
-                      <Eye size={16} />
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
-                      onClick={() => handleDownload(doc)}
-                    >
-                      <Download size={16} />
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-yellow-400 hover:bg-yellow-500 text-white p-2 h-auto"
-                      onClick={() => handleEdit(doc)}
-                    >
-                      <Edit3 size={16} />
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-[#3B82F6] hover:bg-[#2563EB] text-white p-2 h-auto"
-                      onClick={() => handleArchive(doc)}
-                    >
-                      <Archive size={16} />
-                    </Button>
-                  </div>
+            {documents.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                  Tidak ada dokumen
                 </td>
               </tr>
-            ))}
+            ) : (
+              documents.map((doc, index) => (
+                <tr key={doc.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-sm text-gray-900">
+                    {(currentPage - 1) * perPage + index + 1}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900">{getJenisLabel(doc.jenis_dokumen)}</td>
+                  <td className="px-4 py-3 text-sm text-gray-900">
+                    {doc.nomor_ditetapkan || "-"}
+                    <br />
+                    {formatDate(doc.tanggal_ditetapkan)}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900">{doc.tentang}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(doc.status)}`}>
+                      {doc.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2 items-center justify-center">
+                      <Button
+                        size="sm"
+                        className="bg-green-100 hover:bg-green-200 text-green-700 p-2 h-auto"
+                        onClick={() => handleView(doc)}
+                      >
+                        <Eye size={16} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
+                        onClick={() => handleDownload(doc)}
+                      >
+                        <Download size={16} />
+                      </Button>
+                      {(doc.status === "Draft" || doc.status === "Ditolak") && (
+                        <Button
+                          size="sm"
+                          className="bg-yellow-400 hover:bg-yellow-500 text-white p-2 h-auto"
+                          onClick={() => handleEdit(doc)}
+                        >
+                          <Edit3 size={16} />
+                        </Button>
+                      )}
+                      {doc.status === "Disetujui" && (
+                        <Button
+                          size="sm"
+                          className="bg-[#3B82F6] hover:bg-[#2563EB] text-white p-2 h-auto"
+                          onClick={() => handleArchive(doc)}
+                        >
+                          <Archive size={16} />
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
+          <div className="text-sm text-gray-700">
+            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, totalDocuments)} of{" "}
+            {totalDocuments} results
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <span className="px-4 py-1 border border-gray-300 rounded-lg bg-green-50">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* PDF Modal */}
       {isPDFModalOpen && (
@@ -202,12 +442,12 @@ export default function DokumenPage() {
         </div>
       )}
 
-      {/* Delete Modal */}
+      {/* Archive Modal */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg w-full max-w-md p-6">
             <h3 className="text-center text-lg font-semibold text-gray-900 mb-6">
-              Apakah Anda yakin ingin menghapus dokumen ini?
+              Apakah Anda yakin ingin mengarsipkan dokumen ini?
             </h3>
             <div className="flex gap-4 justify-center">
               <button
@@ -217,7 +457,7 @@ export default function DokumenPage() {
                 Batal
               </button>
               <button
-                onClick={confirmDelete}
+                onClick={confirmArchive}
                 className="px-8 py-2 bg-[#2D5F2E] hover:bg-[#234a23] text-white rounded-full font-medium"
               >
                 Ya
@@ -255,31 +495,68 @@ export default function DokumenPage() {
       {/* Edit Modal */}
       {isEditModalOpen && selectedDoc && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg w-full max-w-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">UPLOAD DOKUMEN</h3>
-            <form className="space-y-4">
+          <div className="bg-white rounded-lg w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">EDIT DOKUMEN</h3>
+            <form className="space-y-4" onSubmit={handleSubmitEdit}>
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Pilih Dokumen</label>
-                <div className="border border-gray-300 rounded-lg p-3 flex items-center justify-between">
-                  <span className="text-gray-500 text-sm">Pilih Dokumen</span>
-                  <span className="bg-red-100 text-red-600 px-3 py-1 rounded text-xs font-medium">PDF</span>
-                </div>
+                <label className="block text-sm text-gray-600 mb-2">JENIS DOKUMEN</label>
+                <select
+                  value={formData.jenis_dokumen}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      jenis_dokumen: e.target.value as any,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
+                >
+                  <option value="peraturan_desa">Peraturan Desa</option>
+                  <option value="peraturan_kepala_desa">Peraturan Kepala Desa</option>
+                  <option value="peraturan_bersama_kepala_desa">Peraturan Bersama Kepala Desa</option>
+                </select>
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-2">JENIS</label>
+                <label className="block text-sm text-gray-600 mb-2">Upload PDF Baru (Opsional)</label>
                 <input
-                  type="text"
-                  defaultValue={selectedDoc.jenis}
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      file_upload: e.target.files?.[0] || null,
+                    })
+                  }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-2">NOMOR & TANGGAL DITETAPKAN</label>
+                <label className="block text-sm text-gray-600 mb-2">NOMOR DITETAPKAN</label>
                 <input
                   type="text"
-                  defaultValue={selectedDoc.nomorTanggalDitetapkan}
+                  value={formData.nomor_ditetapkan}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      nomor_ditetapkan: e.target.value,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">TANGGAL DITETAPKAN</label>
+                <input
+                  type="date"
+                  value={formData.tanggal_ditetapkan}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      tanggal_ditetapkan: e.target.value,
+                    })
+                  }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
                 />
               </div>
@@ -288,17 +565,29 @@ export default function DokumenPage() {
                 <label className="block text-sm text-gray-600 mb-2">TENTANG</label>
                 <input
                   type="text"
-                  defaultValue={selectedDoc.tentang}
+                  value={formData.tentang}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      tentang: e.target.value,
+                    })
+                  }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-2">NOMOR</label>
-                <input
-                  type="text"
-                  defaultValue={selectedDoc.nomor}
+                <label className="block text-sm text-gray-600 mb-2">KETERANGAN</label>
+                <textarea
+                  value={formData.keterangan}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      keterangan: e.target.value,
+                    })
+                  }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
+                  rows={3}
                 />
               </div>
 
@@ -311,11 +600,7 @@ export default function DokumenPage() {
                   Batal
                 </button>
                 <button
-                  type="button"
-                  onClick={() => {
-                    alert("Dokumen berhasil diupdate!");
-                    setIsEditModalOpen(false);
-                  }}
+                  type="submit"
                   className="px-8 py-2 bg-[#2D5F2E] hover:bg-[#234a23] text-white rounded-full font-medium"
                 >
                   Simpan
