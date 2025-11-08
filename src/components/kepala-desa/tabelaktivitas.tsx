@@ -6,9 +6,9 @@ import { useState } from "react";
 export interface Activity {
     no: number;
     waktu: string;
-    aksi: string;
+    aksi: string;           // Dari backend: "aktivitas"
     user: string;
-    detailPerubahan: string;
+    detailPerubahan: string; // Dari backend: "keterangan"
 }
 
 interface TabelAktivitasProps {

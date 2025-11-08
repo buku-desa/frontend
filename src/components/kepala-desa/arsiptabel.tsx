@@ -9,12 +9,12 @@ import { DownloadConfirmationDialog } from "@/components/kepala-desa/download-co
 
 interface ArchivedDocument {
     id: number;
-    jenis: string;
-    nomorTanggalDitetapkan: string;
-    tentang: string;
-    tanggal: string;
-    nomor: string;
-    pdfUrl?: string;
+    jenis: string;                    // Dari backend: document.jenis_dokumen
+    nomorTanggalDitetapkan: string;   // Dari backend: document.nomor_ditetapkan + document.tanggal_ditetapkan
+    tentang: string;                  // Dari backend: document.tentang
+    tanggal: string;                  // Dari backend: tanggal_arsip
+    nomor: string;                    // Dari backend: nomor_arsip
+    pdfUrl?: string;                  // Dari backend: document.file_url
 }
 
 interface TabelArsipProps {

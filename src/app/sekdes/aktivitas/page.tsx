@@ -155,7 +155,7 @@ export default function AktivitasPage() {
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">AKSI</th>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">USER</th>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                DETAIL AKTIVITAS
+                DETAIL PERUBAHAN
               </th>
             </tr>
           </thead>
@@ -179,7 +179,7 @@ export default function AktivitasPage() {
                     <br />
                     <span className="text-xs text-gray-500">{activity.user?.role}</span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{activity.aktivitas}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{activity.keterangan || "-"}</td>
                 </tr>
               ))
             )}
