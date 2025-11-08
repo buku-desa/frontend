@@ -36,3 +36,6 @@ next-env.d.ts
 
 # turbopack
 .turbo
+
+# exclude parent directory projects  
+../warga-fe-dev/
