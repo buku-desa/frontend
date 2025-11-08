@@ -2,6 +2,7 @@ import type { NextPage } from 'next'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
+import Link from 'next/link'
 import Header from '../src/components/warga/Header'
 import Hero from '../src/components/warga/Hero'
 import SearchBar from '../src/components/warga/SearchBar'
@@ -9,10 +10,32 @@ import BeritaCard from '../src/components/warga/BeritaCard'
 import BukuTable from '../src/components/warga/BukuTable'
 import bukuData from '../src/data/bukuData'
 
-const mockBerita = Array.from({ length: 5 }).map((_, i) => ({
-  id: i + 1,
-  title: `Peraturan Kalurahan ${i + 2021}`,
-}))
+const mockBerita = [
+    {
+    id: 1,
+    title: 'Ujian Seleksi Pamong Kalurahan Caturtunggal Resmi Dibuka',
+    date: '1 September 2025',
+    url: '/Ujian Seleksi Pamong Kalurahan Caturtunggal Resmi Dibuka.pdf',
+  },
+  {
+    id: 2,
+    title: 'Pembudidaya Ikan Minadadi Terima Bantuan Bibit dan Perlengkapan dari Kalurahan Caturtunggal',
+    date: '24 September 2025',
+    url: '/Pembudidaya Ikan Minadadi Terima Bantuan Bibit dan Perlengkapan dari Kalurahan Caturtunggal.pdf',
+  },
+  {
+    id: 3,
+    title: 'Caturtunggal Hadirkan Dukcapil dan Pengadilan Negeri Sleman',
+    date: '1 Oktober 2025',
+    url: '/Caturtunggal Hadirkan Dukcapil dan Pengadilan Negeri Sleman.pdf',
+  },
+  {
+    id: 4,
+    title: 'Sosialisasi Perda DIY Nomor 3 Tahun 2020: DPRD DIY Tekankan Pembangunan Wilayah Perbatasan',
+    date: '15 Oktober 2025',
+    url: '/Sosialisasi Perda DIY Nomor 3 Tahun 2020_ DPRD DIY Tekankan Pembangunan Wilayah Perbatasan.pdf',
+  },
+]
 
 const extractYear = (value: string) => {
   const match = value.match(/(\d{4})\b/)
@@ -58,7 +81,9 @@ const Home: NextPage = () => {
         <div className="mt-4 overflow-x-auto">
           <div className="flex gap-4 snap-x snap-mandatory pb-2">
             {mockBerita.map((b) => (
-              <BeritaCard key={b.id} title={b.title} />
+              <Link key={b.id} href={b.url} target="_blank" rel="noopener noreferrer">
+                <BeritaCard title={b.title} date={b.date} />
+              </Link>
             ))}
           </div>
         </div>

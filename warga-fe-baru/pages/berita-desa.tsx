@@ -53,43 +53,32 @@ type BeritaItem = {
 
 const mockBerita: BeritaItem[] = [
   {
-    id: 6,
-    title: 'PERATURAN KALURAHAN CATURTUNGGAL APBKAL 2023',
-    date: '30 Desember 2022',
-    description: 'Peraturan Kalurahan Caturtunggal tentang APBKAL 2023',
-    docId: 6,
+    id: 4,
+    title: 'Sosialisasi Perda DIY Nomor 3 Tahun 2020: DPRD DIY Tekankan Pembangunan Wilayah Perbatasan',
+    date: '15 Oktober 2025',
+    description: 'DPRD DIY menyelenggarakan sosialisasi Peraturan Daerah DIY Nomor 3 Tahun 2020 dengan menekankan pentingnya pembangunan wilayah perbatasan untuk kemajuan daerah.',
+    url: '/Sosialisasi Perda DIY Nomor 3 Tahun 2020_ DPRD DIY Tekankan Pembangunan Wilayah Perbatasan.pdf',
   },
   {
     id: 1,
-    title: 'PERATURAN KALURAHAN SENDANGSARI NOMOR 6 TAHUN 2021 TENTANG RENCANA KERJA PEMERINTAH KALURAHAN TAHUN 2022',
-    date: '26 November 2021',
-    description: 'Peraturan Kalurahan Sendangsari nomor 6 tahun 2021 tentang Rencana Kerja Pemerintah Kalurahan Tahun 2022',
-    docId: 1,
-  },
-  {
-    id: 2,
-    title: 'PERKAL NO.1 TAHUN 2022 LAPORAN PERTANGGUNGJAWABAN',
-    date: '16 Februari 2022',
-    description: 'Laporan Pertanggungjawaban Realisasi Pelaksanaan APBKal Tahun Anggaran 2021 Pemerintah Kalurahan Wonokromo',
-    docId: 2,
+    title: 'Caturtunggal Hadirkan Dukcapil dan Pengadilan Negeri Sleman',
+    date: '1 Oktober 2025',
+    description: 'Kalurahan Caturtunggal menghadirkan layanan Dukcapil dan Pengadilan Negeri Sleman untuk kemudahan warga dalam mengurus administrasi dan layanan hukum.',
+    url: '/Caturtunggal Hadirkan Dukcapil dan Pengadilan Negeri Sleman.pdf',
   },
   {
     id: 3,
-    title: 'Judul berita desa',
-    date: '14 September 2025',
-    description: 'Lorem ipsum dolor sit amet consectetur. Lorem hac nisi velit dignissim. Massa fringilla urna sed id. Lobortis vulputate morbi blandit feli.',
+    title: 'Pembudidaya Ikan Minadadi Terima Bantuan Bibit dan Perlengkapan dari Kalurahan Caturtunggal',
+    date: '24 September 2025',
+    description: 'Kalurahan Caturtunggal memberikan bantuan bibit ikan dan perlengkapan budidaya kepada kelompok pembudidaya ikan Minadadi untuk meningkatkan produksi dan kesejahteraan masyarakat.',
+    url: '/Pembudidaya Ikan Minadadi Terima Bantuan Bibit dan Perlengkapan dari Kalurahan Caturtunggal.pdf',
   },
   {
-    id: 4,
-    title: 'Judul berita desa',
-    date: '14 September 2025',
-    description: 'Lorem ipsum dolor sit amet consectetur. Lorem hac nisi velit dignissim. Massa fringilla urna sed id. Lobortis vulputate morbi blandit feli.',
-  },
-  {
-    id: 5,
-    title: 'Judul berita desa',
-    date: '14 September 2025',
-    description: 'Lorem ipsum dolor sit amet consectetur. Lorem hac nisi velit dignissim. Massa fringilla urna sed id. Lobortis vulputate morbi blandit feli.',
+    id: 2,
+    title: 'Ujian Seleksi Pamong Kalurahan Caturtunggal Resmi Dibuka',
+    date: '1 September 2025',
+    description: 'Kalurahan Caturtunggal membuka pendaftaran ujian seleksi calon pamong kalurahan untuk mengisi posisi yang dibutuhkan dalam pelayanan kepada masyarakat.',
+    url: '/Ujian Seleksi Pamong Kalurahan Caturtunggal Resmi Dibuka.pdf',
   },
 ]
 
@@ -109,13 +98,17 @@ const BeritaDesa: NextPage = () => {
 
   // Filter data based on search query
   const combinedData = useMemo(() => {
-    const matchedDocIds = new Set<number>()
+    // Hanya gunakan data dari mockBerita, tidak perlu merge dengan bukuData
+    return mockBerita.map((item) => {
+      // Jika sudah punya url langsung, kembalikan apa adanya
+      if (item.url) {
+        return item
+      }
 
-    const mergedMock = mockBerita.map((item) => {
+      // Jika punya docId, ambil data dari bukuData
       if (item.docId) {
         const doc = bukuData.find((d) => d.id === item.docId)
         if (doc) {
-          matchedDocIds.add(doc.id)
           return {
             ...item,
             title: item.title || doc.title,
@@ -126,36 +119,8 @@ const BeritaDesa: NextPage = () => {
         }
       }
 
-      const itemKey = normalizeKey(item.title)
-      const doc = bukuData.find((d) => {
-        const docKey = normalizeKey(d.title)
-        return docKey === itemKey || docKey.includes(itemKey) || itemKey.includes(docKey)
-      })
-
-      if (doc) {
-        matchedDocIds.add(doc.id)
-        return {
-          ...item,
-          url: `/buku-lembaran/${doc.id}`,
-          date: doc.date,
-          description: doc.description,
-        }
-      }
-
       return item
     })
-
-    const extraDocs = bukuData
-      .filter((doc) => !matchedDocIds.has(doc.id))
-      .map((doc) => ({
-        id: 1000 + doc.id,
-        title: doc.title,
-        date: doc.date,
-        description: doc.description,
-        url: `/buku-lembaran/${doc.id}`,
-      }))
-
-    return [...mergedMock, ...extraDocs]
   }, [])
 
   const filteredData = useMemo(() => {
