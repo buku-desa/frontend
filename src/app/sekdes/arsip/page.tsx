@@ -26,16 +26,15 @@ export default function ArsipPage() {
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [selectedArchive, setSelectedArchive] = useState<Archive | null>(null);
 
-  // Fetch archives
+  // Fetch archives when page changes
   useEffect(() => {
     fetchArchives();
   }, [currentPage]);
 
-  // Live search with debounce
+  // Handle search with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setCurrentPage(1);
-      fetchArchives();
     }, 500);
 
     return () => clearTimeout(timeoutId);
@@ -59,10 +58,14 @@ export default function ArsipPage() {
       }
 
       const response = await getArchives(params);
+      console.log("Archives full response:", response);
+      console.log("Archives meta:", response.meta);
+      console.log("Archives total:", response.meta?.total, typeof response.meta?.total);
 
       setArchives(response.data);
-      setTotalArchives(response.meta.total);
-      setTotalPages(Math.ceil(response.meta.total / perPage));
+      const total = Number(response.meta?.total || 0);
+      setTotalArchives(total);
+      setTotalPages(Math.ceil(total / perPage));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -197,12 +200,9 @@ export default function ArsipPage() {
           <thead>
             <tr className="bg-green-800 text-white">
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
-              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">JENIS</th>
-              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">
-                NOMOR & TANGGAL DITETAPKAN
-              </th>
-              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TENTANG</th>
+              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR ARSIP</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TANGGAL ARSIP</th>
+              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TENTANG</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">KETERANGAN</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
             </tr>
@@ -210,7 +210,7 @@ export default function ArsipPage() {
           <tbody>
             {archives.length === 0 ? (
               <tr>
-                <td colSpan={7} className="border border-gray-300 px-4 py-8 text-center text-gray-500">
+                <td colSpan={6} className="border border-gray-300 px-4 py-8 text-center text-gray-500">
                   Tidak ada arsip
                 </td>
               </tr>
@@ -221,18 +221,13 @@ export default function ArsipPage() {
                     {(currentPage - 1) * perPage + index + 1}
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-gray-900">
-                    {archive.document ? getJenisLabel(archive.document.jenis_dokumen) : "-"}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-3 text-gray-900">
-                    {archive.document?.nomor_ditetapkan || "-"}
-                    <br />
-                    {archive.document && formatDate(archive.document.tanggal_ditetapkan)}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-3 text-gray-900">
-                    {archive.document?.tentang || "-"}
+                    {archive.nomor_arsip || "-"}
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-gray-900">
                     {formatDate(archive.tanggal_arsip)}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-gray-900">
+                    {archive.document?.tentang || "-"}
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-gray-900">
                     {archive.keterangan || "-"}

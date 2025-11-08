@@ -9,11 +9,10 @@ import { DownloadConfirmationDialog } from "@/components/kepala-desa/download-co
 
 interface ArchivedDocument {
     id: number;
-    jenis: string;                    // Dari backend: document.jenis_dokumen
-    nomorTanggalDitetapkan: string;   // Dari backend: document.nomor_ditetapkan + document.tanggal_ditetapkan
+    nomorArsip: string;               // Dari backend: nomor_arsip
+    tanggalArsip: string;             // Dari backend: tanggal_arsip
     tentang: string;                  // Dari backend: document.tentang
-    tanggal: string;                  // Dari backend: tanggal_arsip
-    nomor: string;                    // Dari backend: nomor_arsip
+    keterangan?: string;              // Dari backend: keterangan
     pdfUrl?: string;                  // Dari backend: document.file_url
 }
 
@@ -34,29 +33,26 @@ export default function TabelArsip({ documents }: TabelArsipProps) {
     const defaultDocuments: ArchivedDocument[] = documents || [
         {
             id: 1,
-            jenis: "Peraturan",
-            nomorTanggalDitetapkan: "17 Agustus 2024",
+            nomorArsip: "PD/2024/0001",
+            tanggalArsip: "17 Agustus 2024",
             tentang: "Peraturan Desa Tentang Pengelolaan Keuangan",
-            tanggal: "17 Agustus 2024",
-            nomor: "01",
+            keterangan: "Arsip otomatis setelah disetujui",
             pdfUrl: "/sample.pdf",
         },
         {
             id: 2,
-            jenis: "Peraturan",
-            nomorTanggalDitetapkan: "01 Maret 2025",
+            nomorArsip: "PD/2025/0001",
+            tanggalArsip: "01 Maret 2025",
             tentang: "Peraturan Tentang Rencana Pembangunan",
-            tanggal: "01 Maret 2025",
-            nomor: "02",
+            keterangan: "Arsip otomatis setelah disetujui",
             pdfUrl: "/sample.pdf",
         },
         {
             id: 3,
-            jenis: "Peraturan",
-            nomorTanggalDitetapkan: "30 Juli 2025",
+            nomorArsip: "PD/2025/0002",
+            tanggalArsip: "30 Juli 2025",
             tentang: "Peraturan Tentang Pajak Desa",
-            tanggal: "30 Juli 2025",
-            nomor: "03",
+            keterangan: "Arsip otomatis setelah disetujui",
             pdfUrl: "/sample.pdf",
         },
     ];
@@ -64,7 +60,7 @@ export default function TabelArsip({ documents }: TabelArsipProps) {
     const handleViewDocument = (doc: ArchivedDocument) => {
         if (doc.pdfUrl) {
             setSelectedPDF(doc.pdfUrl);
-            setSelectedTitle(`${doc.jenis} - ${doc.tentang}`);
+            setSelectedTitle(doc.tentang);
             setIsPDFModalOpen(true);
         }
     };
@@ -78,14 +74,14 @@ export default function TabelArsip({ documents }: TabelArsipProps) {
         if (doc && doc.pdfUrl) {
             const link = document.createElement("a");
             link.href = doc.pdfUrl;
-            link.download = `${doc.jenis}-${doc.nomor}.pdf`;
+            link.download = `${doc.nomorArsip}-${doc.tentang}.pdf`;
             link.click();
         }
         setDownloadConfirm({ isOpen: false, docId: null });
     };
 
     const filteredDocs = defaultDocuments.filter((doc) =>
-        [doc.jenis, doc.nomor, doc.tentang].join(" ").toLowerCase().includes(searchQuery.toLowerCase())
+        [doc.nomorArsip, doc.tentang, doc.keterangan].join(" ").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -95,11 +91,9 @@ export default function TabelArsip({ documents }: TabelArsipProps) {
                     <thead>
                         <tr className="bg-green-800 text-white">
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">JENIS</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR & TANGGAL DITETAPKAN</th>
+                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR & TANGGAL ARSIP</th>
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TENTANG</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TANGGAL</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR</th>
+                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">KETERANGAN</th>
                             <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
                         </tr>
                     </thead>
@@ -108,11 +102,13 @@ export default function TabelArsip({ documents }: TabelArsipProps) {
                         {filteredDocs.map((doc) => (
                             <tr key={doc.id} className="hover:bg-gray-50 transition-colors duration-200">
                                 <td className="border border-gray-300 px-4 py-3">{doc.id}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.jenis}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.nomorTanggalDitetapkan}</td>
+                                <td className="border border-gray-300 px-4 py-3">
+                                    {doc.nomorArsip}
+                                    <br />
+                                    <span className="text-sm text-gray-600">{doc.tanggalArsip}</span>
+                                </td>
                                 <td className="border border-gray-300 px-4 py-3">{doc.tentang}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.tanggal}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.nomor}</td>
+                                <td className="border border-gray-300 px-4 py-3">{doc.keterangan || "-"}</td>
                                 <td className="border border-gray-300 px-4 py-3">
                                     <div className="flex gap-2">
                                         <Button
@@ -134,7 +130,7 @@ export default function TabelArsip({ documents }: TabelArsipProps) {
                         ))}
                         {filteredDocs.length === 0 && (
                             <tr>
-                                <td colSpan={7} className="text-center py-6 text-gray-500 italic">
+                                <td colSpan={5} className="text-center py-6 text-gray-500 italic">
                                     Tidak ada dokumen ditemukan.
                                 </td>
                             </tr>

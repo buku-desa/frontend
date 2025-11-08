@@ -15,7 +15,7 @@ import {
   type CreateDocumentData,
 } from "@/lib/api";
 import { getActivityLogs, type ActivityLog } from "@/lib/api";
-import { createArchive } from "@/lib/api";
+import { createArchive, getArchives } from "@/lib/api";
 
 export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,13 +41,20 @@ export default function DashboardPage() {
   const [selectedDoc, setSelectedDoc] = useState<APIDocument | null>(null);
 
   // Form states for add/edit
-  const [formData, setFormData] = useState({
-    jenis_dokumen: "peraturan_desa" as const,
+  const [formData, setFormData] = useState<{
+    jenis_dokumen: 'peraturan_desa' | 'peraturan_kepala_desa' | 'peraturan_bersama_kepala_desa';
+    nomor_ditetapkan: string;
+    tanggal_ditetapkan: string;
+    tentang: string;
+    keterangan: string;
+    file_upload: File | undefined;
+  }>({
+    jenis_dokumen: "peraturan_desa",
     nomor_ditetapkan: "",
     tanggal_ditetapkan: "",
     tentang: "",
     keterangan: "",
-    file_upload: null as File | null,
+    file_upload: undefined,
   });
 
   // Fetch data on mount
@@ -55,11 +62,11 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  // Live search with debounce
+  // Handle search with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       fetchData(searchQuery || undefined);
-    }, 500); // 500ms debounce
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
@@ -80,7 +87,7 @@ export default function DashboardPage() {
       const docsResponse = await getDocuments({ status: "Disetujui", per_page: 3, ...searchParams });
       console.log("Documents response:", docsResponse);
       setDocuments(docsResponse.data);
-      setTotalDocuments(docsResponse.meta.total);
+      setTotalDocuments(Number(docsResponse.meta.total));
 
       // Fetch documents pending verification (Draft status)
       const verifyResponse = await getDocuments({ status: "Draft", per_page: 4, ...searchParams });
@@ -91,6 +98,12 @@ export default function DashboardPage() {
       const logsResponse = await getActivityLogs({ ...(search ? { search } : {}) });
       console.log("Activity logs response:", logsResponse);
       setActivities(logsResponse.data.activity_logs.slice(0, 3));
+
+      // Fetch archives count
+      const archivesResponse = await getArchives({ per_page: 1 });
+      console.log("Archives response:", archivesResponse);
+      console.log("Archives total type:", typeof archivesResponse.meta.total, archivesResponse.meta.total);
+      setTotalArchives(Number(archivesResponse.meta.total));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -171,7 +184,7 @@ export default function DashboardPage() {
       tanggal_ditetapkan: doc.tanggal_ditetapkan || "",
       tentang: doc.tentang,
       keterangan: doc.keterangan || "",
-      file_upload: null,
+      file_upload: undefined,
     });
     setIsEditModalOpen(true);
   };
@@ -202,7 +215,7 @@ export default function DashboardPage() {
       tanggal_ditetapkan: "",
       tentang: "",
       keterangan: "",
-      file_upload: null,
+      file_upload: undefined,
     });
     setIsAddModalOpen(true);
   };
@@ -271,7 +284,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <p className="text-red-600 mb-4">{error}</p>
-        <Button onClick={fetchData}>Coba Lagi</Button>
+        <Button onClick={() => fetchData()}>Coba Lagi</Button>
       </div>
     );
   }
@@ -622,7 +635,7 @@ export default function DashboardPage() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      file_upload: e.target.files?.[0] || null,
+                      file_upload: e.target.files?.[0] || undefined,
                     })
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
@@ -747,7 +760,7 @@ export default function DashboardPage() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      file_upload: e.target.files?.[0] || null,
+                      file_upload: e.target.files?.[0] || undefined,
                     })
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"

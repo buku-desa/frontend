@@ -39,25 +39,31 @@ export default function DokumenPage() {
   const [selectedDoc, setSelectedDoc] = useState<APIDocument | null>(null);
 
   // Form data for edit
-  const [formData, setFormData] = useState({
-    jenis_dokumen: "peraturan_desa" as const,
+  const [formData, setFormData] = useState<{
+    jenis_dokumen: 'peraturan_desa' | 'peraturan_kepala_desa' | 'peraturan_bersama_kepala_desa';
+    nomor_ditetapkan: string;
+    tanggal_ditetapkan: string;
+    tentang: string;
+    keterangan: string;
+    file_upload: File | undefined;
+  }>({
+    jenis_dokumen: "peraturan_desa",
     nomor_ditetapkan: "",
     tanggal_ditetapkan: "",
     tentang: "",
     keterangan: "",
-    file_upload: null as File | null,
+    file_upload: undefined,
   });
 
-  // Fetch documents
+  // Fetch documents when page or filters change
   useEffect(() => {
     fetchDocuments();
   }, [currentPage, statusFilter, jenisFilter]);
 
-  // Live search with debounce
+  // Handle search with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setCurrentPage(1);
-      fetchDocuments();
     }, 500);
 
     return () => clearTimeout(timeoutId);
@@ -89,9 +95,13 @@ export default function DokumenPage() {
       }
 
       const response = await getDocuments(params);
+      console.log("Documents full response:", response);
+      console.log("Documents meta:", response.meta);
+      console.log("Documents total:", response.meta?.total, typeof response.meta?.total);
       setDocuments(response.data);
-      setTotalDocuments(response.meta.total);
-      setTotalPages(Math.ceil(response.meta.total / perPage));
+      const total = Number(response.meta?.total || 0);
+      setTotalDocuments(total);
+      setTotalPages(Math.ceil(total / perPage));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -156,7 +166,7 @@ export default function DokumenPage() {
       tanggal_ditetapkan: doc.tanggal_ditetapkan || "",
       tentang: doc.tentang,
       keterangan: doc.keterangan || "",
-      file_upload: null,
+      file_upload: undefined,
     });
     setIsEditModalOpen(true);
   };
@@ -524,7 +534,7 @@ export default function DokumenPage() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      file_upload: e.target.files?.[0] || null,
+                      file_upload: e.target.files?.[0] || undefined,
                     })
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"

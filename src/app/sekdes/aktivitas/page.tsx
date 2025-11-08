@@ -17,16 +17,15 @@ export default function AktivitasPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalActivities, setTotalActivities] = useState(0);
 
-  // Fetch activities
+  // Fetch activities when page changes
   useEffect(() => {
     fetchActivities();
   }, [currentPage]);
 
-  // Live search with debounce
+  // Handle search with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setCurrentPage(1);
-      fetchActivities();
     }, 500);
 
     return () => clearTimeout(timeoutId);
@@ -48,8 +47,9 @@ export default function AktivitasPage() {
 
       const response = await getActivityLogs(params);
       setActivities(response.data.activity_logs);
-      setTotalActivities(response.meta.pagination.total);
-      setTotalPages(response.meta.pagination.total_pages);
+      const total = Number(response.meta.pagination.total);
+      setTotalActivities(total);
+      setTotalPages(Number(response.meta.pagination.total_pages));
 
       // Mark initial load as complete
       if (isInitialLoad) {
