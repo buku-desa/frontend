@@ -16,7 +16,6 @@ export default function ArsipPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalArchives, setTotalArchives] = useState(0);
   const perPage = 10;
 
   // Modals
@@ -48,24 +47,21 @@ export default function ArsipPage() {
       }
       setError(null);
 
-      const params: any = {
-        per_page: perPage,
-        page: currentPage,
-      };
+      const params: any = {};
 
       if (searchQuery) {
         params.search = searchQuery;
       }
 
+      // Fetch ALL archives (no server pagination)
       const response = await getArchives(params);
       console.log("Archives full response:", response);
       console.log("Archives meta:", response.meta);
       console.log("Archives total:", response.meta?.total, typeof response.meta?.total);
 
+      // Set all archives
       setArchives(response.data);
-      const total = Number(response.meta?.total || 0);
-      setTotalArchives(total);
-      setTotalPages(Math.ceil(total / perPage));
+      setTotalPages(Math.ceil(response.data.length / perPage));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -152,6 +148,11 @@ export default function ArsipPage() {
     );
   }
 
+  // Client-side pagination
+  const startIndex = (currentPage - 1) * perPage;
+  const endIndex = startIndex + perPage;
+  const displayedArchives = archives.slice(startIndex, endIndex);
+
   return (
     <div className="space-y-8">
       {/* Arsip Card & Search Bar */}
@@ -164,7 +165,7 @@ export default function ArsipPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Arsip</h3>
-            <p className="text-sm text-gray-600">Total : {totalArchives}</p>
+            <p className="text-sm text-gray-600">Total : {archives.length}</p>
           </div>
         </div>
 
@@ -208,14 +209,14 @@ export default function ArsipPage() {
             </tr>
           </thead>
           <tbody>
-            {archives.length === 0 ? (
+            {displayedArchives.length === 0 ? (
               <tr>
                 <td colSpan={6} className="border border-gray-300 px-4 py-8 text-center text-gray-500">
                   Tidak ada arsip
                 </td>
               </tr>
             ) : (
-              archives.map((archive, index) => (
+              displayedArchives.map((archive, index) => (
                 <tr key={archive.id} className="hover:bg-gray-50">
                   <td className="border border-gray-300 px-4 py-3 text-gray-900">
                     {(currentPage - 1) * perPage + index + 1}
@@ -261,8 +262,8 @@ export default function ArsipPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
           <div className="text-sm text-gray-700">
-            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, totalArchives)} of{" "}
-            {totalArchives} results
+            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, archives.length)} of{" "}
+            {archives.length} results
           </div>
           <div className="flex gap-2">
             <button

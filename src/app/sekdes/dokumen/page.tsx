@@ -22,7 +22,6 @@ export default function DokumenPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalDocuments, setTotalDocuments] = useState(0);
   const perPage = 10;
 
   // Filter
@@ -77,10 +76,7 @@ export default function DokumenPage() {
       }
       setError(null);
 
-      const params: any = {
-        per_page: perPage,
-        page: currentPage,
-      };
+      const params: any = {};
 
       if (statusFilter !== "all") {
         params.status = statusFilter;
@@ -94,14 +90,15 @@ export default function DokumenPage() {
         params.search = searchQuery;
       }
 
+      // Fetch ALL documents (no server pagination)
       const response = await getDocuments(params);
       console.log("Documents full response:", response);
       console.log("Documents meta:", response.meta);
       console.log("Documents total:", response.meta?.total, typeof response.meta?.total);
+
+      // Set all documents
       setDocuments(response.data);
-      const total = Number(response.meta?.total || 0);
-      setTotalDocuments(total);
-      setTotalPages(Math.ceil(total / perPage));
+      setTotalPages(Math.ceil(response.data.length / perPage));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -242,6 +239,11 @@ export default function DokumenPage() {
     );
   }
 
+  // Client-side pagination
+  const startIndex = (currentPage - 1) * perPage;
+  const endIndex = startIndex + perPage;
+  const displayedDocuments = documents.slice(startIndex, endIndex);
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -253,7 +255,7 @@ export default function DokumenPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Dokumen</h3>
-            <p className="text-sm text-gray-600">Total : {totalDocuments}</p>
+            <p className="text-sm text-gray-600">Total : {documents.length}</p>
           </div>
         </div>
 
@@ -339,14 +341,14 @@ export default function DokumenPage() {
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            {documents.length === 0 ? (
+            {displayedDocuments.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
                   Tidak ada dokumen
                 </td>
               </tr>
             ) : (
-              documents.map((doc, index) => (
+              displayedDocuments.map((doc, index) => (
                 <tr key={doc.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {(currentPage - 1) * perPage + index + 1}
@@ -410,8 +412,8 @@ export default function DokumenPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
           <div className="text-sm text-gray-700">
-            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, totalDocuments)} of{" "}
-            {totalDocuments} results
+            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, documents.length)} of{" "}
+            {documents.length} results
           </div>
           <div className="flex gap-2">
             <button

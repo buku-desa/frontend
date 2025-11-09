@@ -15,7 +15,6 @@ export default function AktivitasPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalActivities, setTotalActivities] = useState(0);
 
   // Fetch activities when page changes
   useEffect(() => {
@@ -39,17 +38,16 @@ export default function AktivitasPage() {
       }
       setError(null);
 
-      const params: any = { page: currentPage };
+      const params: any = {};
 
       if (searchQuery) {
         params.search = searchQuery;
       }
 
+      // Fetch ALL activities (no server pagination)
       const response = await getActivityLogs(params);
       setActivities(response.data.activity_logs);
-      const total = Number(response.meta.pagination.total);
-      setTotalActivities(total);
-      setTotalPages(Number(response.meta.pagination.total_pages));
+      setTotalPages(Math.ceil(response.data.activity_logs.length / 10));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -101,6 +99,11 @@ export default function AktivitasPage() {
     );
   }
 
+  // Client-side pagination
+  const startIndex = (currentPage - 1) * 10;
+  const endIndex = startIndex + 10;
+  const displayedActivities = activities.slice(startIndex, endIndex);
+
   return (
     <div className="space-y-8">
       {/* Aktivitas Card & Search Bar - Side by Side */}
@@ -115,7 +118,7 @@ export default function AktivitasPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Aktivitas</h3>
-            <p className="text-sm text-gray-600">Total : {totalActivities}</p>
+            <p className="text-sm text-gray-600">Total : {activities.length}</p>
           </div>
         </div>
 
@@ -160,14 +163,14 @@ export default function AktivitasPage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {activities.length === 0 ? (
+            {displayedActivities.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                   Tidak ada activity logs
                 </td>
               </tr>
             ) : (
-              activities.map((activity, index) => (
+              displayedActivities.map((activity, index) => (
                 <tr key={activity.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-900">
                     {(currentPage - 1) * 10 + index + 1}
@@ -191,8 +194,8 @@ export default function AktivitasPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
           <div className="text-sm text-gray-700">
-            Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, totalActivities)} of{" "}
-            {totalActivities} results
+            Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, activities.length)} of{" "}
+            {activities.length} results
           </div>
           <div className="flex gap-2">
             <button

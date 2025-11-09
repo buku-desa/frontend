@@ -26,9 +26,9 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Stats
-  const [totalDocuments, setTotalDocuments] = useState(0);
-  const [totalArchives, setTotalArchives] = useState(0);
+  // All data for stats
+  const [allDocuments, setAllDocuments] = useState<APIDocument[]>([]);
+  const [allArchives, setAllArchives] = useState<any[]>([]);
 
   // Modal states
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
@@ -83,11 +83,13 @@ export default function DashboardPage() {
 
       const searchParams = search ? { search } : {};
 
-      // Fetch recent documents (approved)
-      const docsResponse = await getDocuments({ status: "Disetujui", per_page: 3, ...searchParams });
-      console.log("Documents response:", docsResponse);
-      setDocuments(docsResponse.data);
-      setTotalDocuments(Number(docsResponse.meta.total));
+      // Fetch all documents for total count (all statuses)
+      const allDocsResponse = await getDocuments({ ...searchParams });
+      setAllDocuments(allDocsResponse.data);
+
+      // Fetch recent documents (approved) for display - just take first 3 from approved ones
+      const approvedDocs = allDocsResponse.data.filter((d: APIDocument) => d.status === "Disetujui").slice(0, 3);
+      setDocuments(approvedDocs);
 
       // Fetch documents pending verification (Draft status)
       const verifyResponse = await getDocuments({ status: "Draft", per_page: 4, ...searchParams });
@@ -99,11 +101,11 @@ export default function DashboardPage() {
       console.log("Activity logs response:", logsResponse);
       setActivities(logsResponse.data.activity_logs.slice(0, 3));
 
-      // Fetch archives count
-      const archivesResponse = await getArchives({ per_page: 1 });
+      // Fetch all archives for total count
+      const archivesResponse = await getArchives({});
       console.log("Archives response:", archivesResponse);
       console.log("Archives total type:", typeof archivesResponse.meta.total, archivesResponse.meta.total);
-      setTotalArchives(Number(archivesResponse.meta.total));
+      setAllArchives(archivesResponse.data);
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -296,37 +298,37 @@ export default function DashboardPage() {
         {/* Dokumen Card */}
         <Link
           href="/sekdes/dokumen"
-          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
+          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full lg:w-auto lg:min-w-[320px] cursor-pointer"
         >
           <div className="bg-green-50 rounded-lg p-3 shrink-0">
             <FileText className="w-10 h-10 text-green-600" strokeWidth={1.5} />
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Dokumen</h3>
-            <p className="text-sm text-gray-600">Total : {totalDocuments}</p>
+            <p className="text-sm text-gray-600">Total : {allDocuments.length}</p>
           </div>
         </Link>
 
         {/* Arsip Card */}
         <Link
           href="/sekdes/arsip"
-          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
+          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full lg:w-auto lg:min-w-[320px] cursor-pointer"
         >
-          <div className="bg-green-50 rounded-lg p-3 shrink-0">
+          <div className="bg-green-100 rounded-lg p-3 shrink-0">
             <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
               <path d="M3 4h18v4H3V4zm0 6h18v10H3V10zm4 2v6h10v-6H7z" />
             </svg>
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Arsip</h3>
-            <p className="text-sm text-gray-600">Total : {totalArchives}</p>
+            <p className="text-sm text-gray-600">Total : {allArchives.length}</p>
           </div>
         </Link>
 
         {/* Aktivitas Card */}
         <Link
           href="/sekdes/aktivitas"
-          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
+          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full lg:w-auto lg:min-w-[320px] cursor-pointer"
         >
           <div className="bg-green-50 rounded-lg p-3 shrink-0">
             <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
