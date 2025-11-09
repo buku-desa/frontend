@@ -139,7 +139,9 @@ export default function DokumenPage() {
     if (!selectedDoc) return;
 
     try {
+      console.log("🔽 Download starting for document:", selectedDoc.id);
       const blob = await downloadDocument(selectedDoc.id);
+      console.log("🔽 Blob received:", blob);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -148,8 +150,14 @@ export default function DokumenPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      console.log("✅ Download completed successfully");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Gagal mendownload dokumen");
+      console.error("❌ Download error full object:", err);
+      console.error("❌ Error response:", err.response);
+      console.error("❌ Error message:", err.message);
+      console.error("❌ Error status:", err.response?.status);
+      console.error("❌ Error data:", err.response?.data);
+      alert(err.response?.data?.message || err.message || "Gagal mendownload dokumen");
     } finally {
       setIsDownloadModalOpen(false);
     }

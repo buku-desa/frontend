@@ -46,6 +46,12 @@ export default function AktivitasPage() {
 
       // Fetch ALL activities (no server pagination)
       const response = await getActivityLogs(params);
+      console.log("🔍 DEBUG: Full API Response:", response);
+      console.log("🔍 DEBUG: Activity Logs:", response.data.activity_logs);
+      // Log each activity string
+      response.data.activity_logs.forEach((log: any, i: number) => {
+        console.log(`🔍 [${i}] aktivitas: "${log.aktivitas}"`);
+      });
       setActivities(response.data.activity_logs);
       setTotalPages(Math.ceil(response.data.activity_logs.length / 10));
 
@@ -74,18 +80,18 @@ export default function AktivitasPage() {
 
   const getActionBadge = (action: string) => {
     // Try to extract action from aktivitas string
-    if (action.includes("upload") || action.includes("Upload") || action.includes("ditambahkan")) {
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Upload</span>;
-    } else if (action.includes("edit") || action.includes("Edit") || action.includes("diupdate")) {
+    if (action.includes("created") || action.includes("upload") || action.includes("Upload") || action.includes("ditambahkan") || action.includes("dibuat")) {
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Buat</span>;
+    } else if (action.includes("updated") || action.includes("edit") || action.includes("Edit") || action.includes("diupdate") || action.includes("diperbarui")) {
       return <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Edit</span>;
-    } else if (action.includes("setuju") || action.includes("Setuju") || action.includes("Disetujui")) {
+    } else if (action.includes("approved") || action.includes("setuju") || action.includes("Setuju") || action.includes("Disetujui")) {
       return (
-        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Verifikasi</span>
+        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Disetujui</span>
       );
-    } else if (action.includes("arsip") || action.includes("Arsip")) {
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Arsip</span>;
-    } else if (action.includes("hapus") || action.includes("Hapus") || action.includes("Delete")) {
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Hapus</span>;
+    } else if (action.includes("archived") || action.includes("arsip") || action.includes("Arsip") || action.includes("diarsipkan")) {
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Arsip</span>;
+    } else if (action.includes("rejected") || action.includes("hapus") || action.includes("Hapus") || action.includes("Delete") || action.includes("ditolak")) {
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Ditolak</span>;
     } else {
       return <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Lainnya</span>;
     }
