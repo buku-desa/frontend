@@ -14,7 +14,7 @@ interface ArchivedDocument {
     nomorTanggalDitetapkan: string;
     tentang: string;
     tanggal: string;
-    nomor: string;
+    nomor_arsip?: string;
     pdfUrl?: string;
 }
 
@@ -53,7 +53,7 @@ export default function ArsipPage() {
             nomorTanggalDitetapkan: "30 Juli 2025",
             tentang: "Peraturan Tentang Pajak Desa",
             tanggal: "30 Juli 2025",
-            nomor: "03",
+            nomor_: "03",
             pdfUrl: "/sample.pdf",
         },
     ];
@@ -75,14 +75,14 @@ export default function ArsipPage() {
         if (doc && doc.pdfUrl) {
             const link = document.createElement("a");
             link.href = doc.pdfUrl;
-            link.download = `${doc.jenis}-${doc.nomor}.pdf`;
+            link.download = `${doc.jenis}-${doc.nomor_arsip}.pdf`;
             link.click();
         }
         setDownloadConfirm({ isOpen: false, docId: null });
     };
 
     const filteredDocs = documents.filter((doc) =>
-        [doc.jenis, doc.nomor, doc.tentang]
+        [doc.jenis, doc.nomor_arsip, doc.tentang]
             .join(" ")
             .toLowerCase()
             .includes(searchQuery.toLowerCase())

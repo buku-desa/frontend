@@ -1,163 +1,238 @@
-// components/tabel-arsip.tsx
 "use client";
 
-import { useState } from "react";
-import { Eye, Download } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Eye, Download, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/shared/ui/button";
-import { PDFViewerModal } from "@/components/kepala-desa/pdf-viewer-modal";
-import { DownloadConfirmationDialog } from "@/components/kepala-desa/download-confirmation-dialog";
+import { getDocumentDownloadUrl } from "@/lib/api/shared/documents";
+import { getArchives, type Archive, downloadDocument } from "@/lib/api";
 
-interface ArchivedDocument {
-    id: number;
-    jenis: string;
-    nomorTanggalDitetapkan: string;
-    tentang: string;
-    tanggal: string;
-    nomor: string;
-    pdfUrl?: string;
-}
+export default function TabelArsip() {
+    const [archives, setArchives] = useState<Archive[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-interface TabelArsipProps {
-    documents?: ArchivedDocument[];
-}
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalArchives, setTotalArchives] = useState(0);
+    const perPage = 10;
 
-export default function TabelArsip({ documents }: TabelArsipProps) {
-    const [searchQuery, setSearchQuery] = useState("");
+    // Modals
     const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
     const [selectedPDF, setSelectedPDF] = useState<string>("");
     const [selectedTitle, setSelectedTitle] = useState<string>("");
-    const [downloadConfirm, setDownloadConfirm] = useState<{ isOpen: boolean; docId: number | null }>({
-        isOpen: false,
-        docId: null,
-    });
+    const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+    const [selectedArchive, setSelectedArchive] = useState<Archive | null>(null);
 
-    const defaultDocuments: ArchivedDocument[] = documents || [
-        {
-            id: 1,
-            jenis: "Peraturan",
-            nomorTanggalDitetapkan: "17 Agustus 2024",
-            tentang: "Peraturan Desa Tentang Pengelolaan Keuangan",
-            tanggal: "17 Agustus 2024",
-            nomor: "01",
-            pdfUrl: "/sample.pdf",
-        },
-        {
-            id: 2,
-            jenis: "Peraturan",
-            nomorTanggalDitetapkan: "01 Maret 2025",
-            tentang: "Peraturan Tentang Rencana Pembangunan",
-            tanggal: "01 Maret 2025",
-            nomor: "02",
-            pdfUrl: "/sample.pdf",
-        },
-        {
-            id: 3,
-            jenis: "Peraturan",
-            nomorTanggalDitetapkan: "30 Juli 2025",
-            tentang: "Peraturan Tentang Pajak Desa",
-            tanggal: "30 Juli 2025",
-            nomor: "03",
-            pdfUrl: "/sample.pdf",
-        },
-    ];
+    useEffect(() => {
+        fetchArchives();
+    }, [currentPage]);
 
-    const handleViewDocument = (doc: ArchivedDocument) => {
-        if (doc.pdfUrl) {
-            setSelectedPDF(doc.pdfUrl);
-            setSelectedTitle(`${doc.jenis} - ${doc.tentang}`);
+    const fetchArchives = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const params: any = { per_page: perPage, page: currentPage };
+            const response = await getArchives(params);
+
+            setArchives(response.data);
+            setTotalArchives(response.meta.total);
+            setTotalPages(Math.ceil(response.meta.total / perPage));
+        } catch (err: any) {
+            console.error("Error fetching archives:", err);
+            setError(err.response?.data?.message || "Gagal memuat arsip");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleView = async (archive: Archive) => {
+        if (!archive.document) return;
+
+        try {
+            setSelectedTitle(`${getJenisLabel(archive.document.jenis_dokumen)} - ${archive.document.tentang}`);
             setIsPDFModalOpen(true);
+            setSelectedPDF("");
+
+            const blob = await downloadDocument(archive.document.id);
+            const pdfUrl = window.URL.createObjectURL(blob);
+            setSelectedPDF(pdfUrl);
+        } catch (err: any) {
+            console.error("Error loading PDF:", err);
+            alert(err.response?.data?.message || "Gagal memuat PDF");
+            setIsPDFModalOpen(false);
         }
     };
 
-    const handleDownloadClick = (docId: number) => {
-        setDownloadConfirm({ isOpen: true, docId });
+    const handleDownload = (archive: Archive) => {
+        setSelectedArchive(archive);
+        setIsDownloadModalOpen(true);
     };
 
-    const handleDownloadConfirm = () => {
-        const doc = defaultDocuments.find((d) => d.id === downloadConfirm.docId);
-        if (doc && doc.pdfUrl) {
-            const link = document.createElement("a");
-            link.href = doc.pdfUrl;
-            link.download = `${doc.jenis}-${doc.nomor}.pdf`;
-            link.click();
+    const confirmDownload = async () => {
+        if (!selectedArchive?.document) return;
+
+        try {
+            const blob = await downloadDocument(selectedArchive.document.id);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${selectedArchive.document.tentang}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (err: any) {
+            alert(err.response?.data?.message || "Gagal mendownload dokumen");
+        } finally {
+            setIsDownloadModalOpen(false);
         }
-        setDownloadConfirm({ isOpen: false, docId: null });
     };
 
-    const filteredDocs = defaultDocuments.filter((doc) =>
-        [doc.jenis, doc.nomor, doc.tentang].join(" ").toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const getJenisLabel = (jenis: string) => {
+        switch (jenis) {
+            case "peraturan_desa":
+                return "Peraturan Desa";
+            case "peraturan_kepala_desa":
+                return "Peraturan Kepala Desa";
+            case "peraturan_bersama_kepala_desa":
+                return "Peraturan Bersama Kepala Desa";
+            default:
+                return jenis;
+        }
+    };
+
+    const formatDate = (dateString: string) =>
+        new Date(dateString).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+
+    if (loading && archives.length === 0) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+            </div>
+        );
+    }
 
     return (
-        <>
-            <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
+        <div className="space-y-8">
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">{error}</div>
+            )}
+
+            {/* Table */}
+            <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg">
+                <table className="w-full border-collapse table-fixed">
                     <thead>
                         <tr className="bg-green-800 text-white">
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">JENIS</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR & TANGGAL DITETAPKAN</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TENTANG</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TANGGAL</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
+                            <th className="border border-gray-300 px-6 py-3 text-left font-semibold">NO</th>
+                            <th className="border border-gray-300 px-6 py-3 text-left font-semibold">NOMOR ARSIP</th>
+                            <th className="border border-gray-300 px-6 py-3 text-left font-semibold">TANGGAL ARSIP</th>
+                            <th className="border border-gray-300 px-6 py-3 text-left font-semibold">TENTANG</th>
+                            <th className="border border-gray-300 px-6 py-3 text-left font-semibold">KETERANGAN</th>
+                            <th className="border border-gray-300 px-6 py-3 text-center font-semibold">AKSI</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        {filteredDocs.map((doc) => (
-                            <tr key={doc.id} className="hover:bg-gray-50 transition-colors duration-200">
-                                <td className="border border-gray-300 px-4 py-3">{doc.id}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.jenis}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.nomorTanggalDitetapkan}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.tentang}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.tanggal}</td>
-                                <td className="border border-gray-300 px-4 py-3">{doc.nomor}</td>
-                                <td className="border border-gray-300 px-4 py-3">
-                                    <div className="flex gap-2">
-                                        <Button
-                                            size="sm"
-                                            className="bg-green-100 hover:bg-green-200 text-green-700 p-2 h-auto"
-                                            onClick={() => handleViewDocument(doc)}
-                                        >
-                                            <Eye size={18} />
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
-                                            onClick={() => handleDownloadClick(doc.id)}>
-                                            <Download size={18} />
-                                        </Button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                        {filteredDocs.length === 0 && (
+                        {archives.length === 0 ? (
                             <tr>
-                                <td colSpan={7} className="text-center py-6 text-gray-500 italic">
-                                    Tidak ada dokumen ditemukan.
+                                <td colSpan={6} className="border border-gray-300 px-6 py-8 text-center text-gray-500">
+                                    Tidak ada arsip
                                 </td>
                             </tr>
+                        ) : (
+                            archives.map((archive, index) => (
+                                <tr key={archive.id} className="hover:bg-gray-50 transition-colors duration-200">
+                                    <td className="border border-gray-300 px-6 py-3 text-gray-900">
+                                        {(currentPage - 1) * perPage + index + 1}
+                                    </td>
+                                    <td className="border border-gray-300 px-6 py-3 text-gray-900">
+                                        {archive.nomor_arsip || "-"}
+                                    </td>
+                                    <td className="border border-gray-300 px-6 py-3 text-gray-900">
+                                        {archive.tanggal_arsip ? formatDate(archive.tanggal_arsip) : "-"}
+                                    </td>
+                                    <td className="border border-gray-300 px-6 py-3 text-gray-900">
+                                        {archive.document?.tentang || "-"}
+                                    </td>
+                                    <td className="border border-gray-300 px-6 py-3 text-gray-900">
+                                        {archive.keterangan || "-"}
+                                    </td>
+                                    <td className="border border-gray-300 px-6 py-3 text-center">
+                                        <div className="flex gap-2 justify-center">
+                                            <Button size="sm" className="bg-green-100 hover:bg-green-200 text-green-700 p-2 h-auto" onClick={() => handleView(archive)}>
+                                                <Eye size={16} />
+                                            </Button>
+                                            <Button size="sm" className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
+                                                onClick={() => handleDownload(archive)}>
+                                                <Download size={16} />
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
                         )}
                     </tbody>
                 </table>
+
             </div>
 
-            {/* PDF Viewer Modal */}
-            <PDFViewerModal
-                isOpen={isPDFModalOpen}
-                onClose={() => setIsPDFModalOpen(false)}
-                pdfUrl={selectedPDF}
-                documentName={selectedTitle}
-            />
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
+                    <div className="text-sm text-gray-700">
+                        Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, totalArchives)} of {totalArchives} results
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+                        <span className="px-4 py-1 border border-gray-300 rounded-lg bg-green-50">{currentPage} / {totalPages}</span>
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                        >
+                            <ChevronRight size={16} />
+                        </button>
+                    </div>
+                </div>
+            )}
 
-            {/* Download Confirmation Dialog */}
-            <DownloadConfirmationDialog
-                isOpen={downloadConfirm.isOpen}
-                onConfirm={handleDownloadConfirm}
-                onCancel={() => setDownloadConfirm({ isOpen: false, docId: null })}
-                documentName="dokumen"
-            />
-        </>
+            {/* PDF Modal */}
+            {isPDFModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg w-full max-w-4xl h-[90vh] flex flex-col">
+                        <div className="flex items-center justify-between p-4 border-b">
+                            <h3 className="text-lg font-semibold text-gray-900">{selectedTitle}</h3>
+                            <button onClick={() => setIsPDFModalOpen(false)} className="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                            <iframe src={selectedPDF} className="w-full h-full" title="PDF Viewer" />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Download Modal */}
+            {isDownloadModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg w-full max-w-md p-6">
+                        <h3 className="text-center text-lg font-semibold text-gray-900 mb-6">
+                            Apakah kamu yakin ingin mendownload dokumen ini?
+                        </h3>
+                        <div className="flex gap-4 justify-center">
+                            <button onClick={() => setIsDownloadModalOpen(false)} className="px-8 py-2 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-full font-medium transition-colors">Batal</button>
+                            <button onClick={confirmDownload} className="px-8 py-2 bg-[#2D5F2E] hover:bg-[#234a23] text-white rounded-full font-medium transition-colors">Ya</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

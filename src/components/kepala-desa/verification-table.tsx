@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import axios from "axios"
 import { Eye, Download, Check, X } from "lucide-react"
 import { Button } from "@/components/shared/ui/button"
 import { DownloadConfirmationDialog } from "@/components/kepala-desa/download-confirmation-dialog"
@@ -8,11 +9,24 @@ import { VerificationConfirmationDialog } from "@/components/kepala-desa/verific
 import { DeclineConfirmationDialog } from "@/components/kepala-desa/decline-confirmation-dialog"
 import { PDFViewerModal } from "@/components/kepala-desa/pdf-viewer-modal"
 
-// 🔹 Helper function untuk ubah header
-function formatHeader(text: string) {
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api"
+
+// 🔹 Helper format teks: ganti _ dengan spasi + kapital tiap kata
+function formatText(text: string) {
     return text
-        .replace(/_/g, " ")            // ganti underscore dengan spasi
-        .replace(/\b\w/g, (c) => c.toUpperCase()) // kapitalisasi tiap kata
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+// 🔹 Helper format tanggal: 2001-04-21 → 21 April 2001
+function formatDate(dateString?: string) {
+    if (!dateString) return "-"
+    const date = new Date(dateString)
+    return date.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    })
 }
 
 interface VerificationDocument {
@@ -21,7 +35,7 @@ interface VerificationDocument {
     nomor_ditetapkan?: string
     tanggal_ditetapkan?: string
     tentang: string
-    status?: "loading" | "verified" | "pending" | "declined" | "Draft"
+    status?: "Draft" | "Disetujui" | "Ditolak" | "Diarsipkan"
     verificationDate?: string
     file_url?: string
 }
@@ -32,7 +46,9 @@ interface VerificationTableProps {
     onVerify?: (docId: string) => void
     onDecline?: (docId: string) => void
     searchQuery?: string
+    filterStatus?: string[] // ⬅️ Tambahkan baris ini
 }
+
 
 export function VerificationTable({
     documents,
@@ -40,168 +56,207 @@ export function VerificationTable({
     onVerify,
     onDecline,
     searchQuery = "",
+    filterStatus = ["Draft"],
 }: VerificationTableProps) {
-    const [downloadConfirm, setDownloadConfirm] = useState<{ isOpen: boolean; docId: string | null }>({
-        isOpen: false,
-        docId: null,
-    })
-    const [verifyConfirm, setVerifyConfirm] = useState<{ isOpen: boolean; docId: string | null }>({
-        isOpen: false,
-        docId: null,
-    })
-    const [declineConfirm, setDeclineConfirm] = useState<{ isOpen: boolean; docId: string | null }>({
-        isOpen: false,
-        docId: null,
-    })
-    const [pdfViewer, setPdfViewer] = useState<{ isOpen: boolean; pdfUrl: string; docName: string }>({
-        isOpen: false,
-        pdfUrl: "",
-        docName: "",
-    })
+    // 🔹 DEBUG: Lihat apa yang masuk
+    console.log("📊 Documents received:", documents.length)
+    console.log("🔍 Filter status:", filterStatus)
+    console.log("📝 Search query:", searchQuery)
+    console.log("📄 Is document page:", isDocumentPage)
 
-    // 🔹 Handlers
-    // 🔹 Download dari API
+    const [downloadConfirm, setDownloadConfirm] = useState({ isOpen: false, docId: null as string | null })
+    const [verifyConfirm, setVerifyConfirm] = useState({ isOpen: false, docId: null as string | null })
+    const [declineConfirm, setDeclineConfirm] = useState({ isOpen: false, docId: null as string | null })
+    const [pdfViewer, setPdfViewer] = useState({ isOpen: false, pdfUrl: "", docName: "" })
+
+    // 🔹 DOWNLOAD FILE
     const handleDownloadConfirm = async () => {
-        const doc = documents.find(d => d.id === downloadConfirm.docId)
+        const doc = documents.find((d) => d.id === downloadConfirm.docId)
         if (!doc) return
 
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`/api/documents/${doc.id}/download`, {
-                method: "GET",
-                headers: { Authorization: `Bearer ${token}` },
+            const response = await axios.get(`${API_BASE_URL}/documents/${doc.id}/download`, {
+                responseType: "blob",
+                withCredentials: true,
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : "",
+                    Accept: "application/json",
+                },
             })
 
-            const blob = await response.blob()
-            const url = window.URL.createObjectURL(blob)
+            const blobUrl = window.URL.createObjectURL(new Blob([response.data]))
             const link = document.createElement("a")
-            link.href = url
+            link.href = blobUrl
             link.download = `dokumen-${doc.nomor_ditetapkan || doc.id}.pdf`
             link.click()
-            window.URL.revokeObjectURL(url)
+            window.URL.revokeObjectURL(blobUrl)
         } catch (error) {
-            console.error("Download gagal", error)
+            console.error("Download gagal:", error)
+            alert("Gagal mengunduh dokumen.")
         }
 
         setDownloadConfirm({ isOpen: false, docId: null })
     }
 
-    // Verifikasi dokumen
+    // 🔹 VERIFIKASI DOKUMEN
     const handleVerifyConfirm = async () => {
-        if (!verifyConfirm.docId) return;
+        if (!verifyConfirm.docId) return
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/documents/${verifyConfirm.docId}/approve`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include", // 🔹 kirim cookie sanctum
-            });
-            if (!response.ok) {
-                console.error("Error status:", response.status, response.statusText);
-                throw new Error("Verifikasi gagal");
-            }
-            alert("Dokumen berhasil diverifikasi");
-            onVerify?.(verifyConfirm.docId);
+            const token = localStorage.getItem("token")
+            await axios.put(
+                `${API_BASE_URL}/documents/${verifyConfirm.docId}/approve`,
+                {},
+                {
+                    withCredentials: true,
+                    headers: {
+                        Authorization: token ? `Bearer ${token}` : "",
+                        Accept: "application/json",
+                    },
+                }
+            )
+            alert("✅ Dokumen berhasil diverifikasi")
+            onVerify?.(verifyConfirm.docId)
         } catch (error) {
-            console.error(error);
-            alert("Gagal verifikasi dokumen");
+            console.error("Verifikasi gagal:", error)
+            alert("Gagal memverifikasi dokumen.")
         }
-        setVerifyConfirm({ isOpen: false, docId: null });
-    };
-
-    const handleDeclineConfirm = async () => {
-        if (!declineConfirm.docId) return;
-        try {
-            const response = await fetch(`http://localhost:8000/api/documents/${declineConfirm.docId}/reject`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-                body: JSON.stringify({ reason: "Dokumen ditolak" }),
-            });
-            if (!response.ok) throw new Error("Penolakan gagal");
-            alert("Dokumen berhasil ditolak");
-            onDecline?.(declineConfirm.docId);
-        } catch (error) {
-            console.error(error);
-            alert("Gagal menolak dokumen");
-        }
-        setDeclineConfirm({ isOpen: false, docId: null });
+        setVerifyConfirm({ isOpen: false, docId: null })
     }
 
+    // 🔹 TOLAK DOKUMEN
+    const handleDeclineConfirm = async () => {
+        if (!declineConfirm.docId) return
+        try {
+            const token = localStorage.getItem("token")
+            await axios.post(
+                `${API_BASE_URL}/documents/${declineConfirm.docId}/reject`,
+                { catatan: "Dokumen ditolak" },
+                {
+                    withCredentials: true,
+                    headers: {
+                        Authorization: token ? `Bearer ${token}` : "",
+                        "Content-Type": "application/json",
+                    },
+                }
+            )
+            alert("❌ Dokumen berhasil ditolak")
+            onDecline?.(declineConfirm.docId)
+        } catch (error) {
+            console.error("Penolakan gagal:", error)
+            alert("Gagal menolak dokumen.")
+        }
+        setDeclineConfirm({ isOpen: false, docId: null })
+    }
 
-    // 🔹 Lihat PDF tetap sama
+    // 🔹 LIHAT PDF
     const handleViewClick = (doc: VerificationDocument) => {
         setPdfViewer({
             isOpen: true,
-            pdfUrl: doc.file_url || "/placeholder.pdf",
-            docName: `${doc.jenis_dokumen} - ${doc.nomor_ditetapkan || doc.id}`,
+            pdfUrl: doc.file_url || `${API_BASE_URL}/documents/${doc.id}`,
+            docName: `${formatText(doc.jenis_dokumen)} - ${doc.nomor_ditetapkan || doc.id}`,
         })
     }
 
-
-    // 🔹 Filter dokumen
+    // 🔹 FILTER DOKUMEN (HANYA DRAFT)
     const filteredDocs = useMemo(() => {
-        // Ambil dokumen yang statusnya Draft
-        let draftDocs = documents.filter(doc => doc.status === "Draft")
-
         const query = searchQuery.toLowerCase().trim()
-        if (!query) return draftDocs
-        return draftDocs.filter(
+
+        let docsToShow = documents.filter((doc) =>
+            (filterStatus ?? ["Draft"]).includes(doc.status ?? "")
+        )
+
+        console.log("✅ Filtered docs:", docsToShow.length, docsToShow)
+
+        if (!query) return docsToShow
+
+        return docsToShow.filter(
             (doc) =>
                 doc.jenis_dokumen.toLowerCase().includes(query) ||
                 (doc.nomor_ditetapkan?.toLowerCase().includes(query) ?? false) ||
                 doc.tentang.toLowerCase().includes(query)
         )
-    }, [documents, searchQuery])
+    }, [documents, searchQuery, filterStatus])
 
 
 
 
-    // 🔹 Status cell
+    // 🔹 STATUS CELL
     const getStatusCell = (doc: VerificationDocument) => {
-        const status = doc.status || "pending"
+        const status = doc.status || "Draft"
 
-        // Tombol selalu muncul di halaman Dokumen Kepala Desa
-        if (isDocumentPage || status === "loading" || status === "Draft") {
+        if (isDocumentPage || status === "Draft") {
             return (
                 <div className="flex gap-2 items-center justify-center">
-                    <Button size="sm" className="bg-green-100 hover:bg-green-200 text-green-700 p-2 h-auto" onClick={() => handleViewClick(doc)}>
+                    <Button
+                        size="sm"
+                        className="bg-green-100 hover:bg-green-200 text-green-700 p-2 h-auto"
+                        onClick={() => handleViewClick(doc)}
+                    >
                         <Eye size={18} />
                     </Button>
-                    <Button size="sm" className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto" onClick={() => setDownloadConfirm({ isOpen: true, docId: doc.id })}>
-                        <Download size={18} />
-                    </Button>
-                    {!isDocumentPage && status !== "verified" && status !== "declined" && (
+                    {!isDocumentPage && status === "Disetujui" && (
                         <>
-                            <Button size="sm" className="bg-yellow-400 hover:bg-yellow-500 text-white p-2 h-auto" onClick={() => setVerifyConfirm({ isOpen: true, docId: doc.id })}>
+                            <Button
+                                size="sm"
+                                className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
+                                onClick={() => setDownloadConfirm({ isOpen: true, docId: doc.id })}
+                            >
+                                <Download size={18} />
+                            </Button> */
+                        </>
+                    )}
+
+                    {/* <Button
+                        size="sm"
+                        className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
+                        onClick={() => setDownloadConfirm({ isOpen: true, docId: doc.id })}
+                    >
+                        <Download size={18} />
+                    </Button> */}
+
+                    {/* Tombol verifikasi & tolak hanya untuk draft */}
+                    {!isDocumentPage && status === "Draft" && (
+                        <>
+                            <Button
+                                size="sm"
+                                className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
+                                onClick={() => setVerifyConfirm({ isOpen: true, docId: doc.id })}
+                            >
                                 <Check size={18} />
                             </Button>
-                            <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white p-2 h-auto" onClick={() => setDeclineConfirm({ isOpen: true, docId: doc.id })}>
+                            <Button
+                                size="sm"
+                                className="bg-red-600 hover:bg-red-700 text-white p-2 h-auto"
+                                onClick={() => setDeclineConfirm({ isOpen: true, docId: doc.id })}
+                            >
                                 <X size={18} />
                             </Button>
                         </>
                     )}
                 </div>
-
             )
         }
 
-        if (status === "verified") {
-            return <span className="text-gray-900 text-sm">Verifikasi {doc.verificationDate}</span>
+        if (status === "Disetujui") {
+            return <span className="text-green-700 text-sm font-semibold">Disetujui</span>
         }
 
-        if (status === "declined") {
+        if (status === "Ditolak") {
             return <span className="text-red-600 text-sm font-semibold">Ditolak</span>
         }
 
-        return <span className="text-gray-500 text-sm italic">Pending</span>
+        if (status === "Diarsipkan") {
+            return <span className="text-blue-700 text-sm font-semibold">Diarsipkan</span>
+        }
+
+        // 🔹 Fallback jika status tidak dikenal
+        return <span className="text-gray-500 text-sm italic">Status Tidak Dikenal</span>
     }
 
-    // 🔹 Header array
-    const headers = ["no", "jenis_dokumen", "nomor_ditetapkan", "tentang", "tanggal_ditetapkan", "nomor_ditetapkan", "status"]
+
+    // 🔹 HEADER
+    const headers = ["No", "Jenis Dokumen", "Nomor Ditetapkan", "Tentang", "Tanggal Ditetapkan", "Status"]
 
     return (
         <>
@@ -211,7 +266,7 @@ export function VerificationTable({
                         <tr className="bg-green-800 text-white">
                             {headers.map((header) => (
                                 <th key={header} className="border border-gray-300 px-4 py-3 text-left font-semibold">
-                                    {formatHeader(header)}
+                                    {formatText(header)}
                                 </th>
                             ))}
                         </tr>
@@ -220,14 +275,11 @@ export function VerificationTable({
                         {filteredDocs.length > 0 ? (
                             filteredDocs.map((doc, index) => (
                                 <tr key={doc.id} className="hover:bg-gray-50">
-                                    <td className="border border-gray-300 px-4 py-3 text-gray-900">{index + 1}</td>
-                                    <td className="border border-gray-300 px-4 py-3 text-gray-900">{doc.jenis_dokumen}</td>
-                                    <td className="border border-gray-300 px-4 py-3 text-gray-900">
-                                        {doc.nomor_ditetapkan ? `${doc.nomor_ditetapkan} / ${doc.tanggal_ditetapkan}` : "-"}
-                                    </td>
-                                    <td className="border border-gray-300 px-4 py-3 text-gray-900">{doc.tentang}</td>
-                                    <td className="border border-gray-300 px-4 py-3 text-gray-900">{doc.tanggal_ditetapkan || "-"}</td>
-                                    <td className="border border-gray-300 px-4 py-3 text-gray-900">{doc.nomor_ditetapkan || "-"}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{index + 1}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{formatText(doc.jenis_dokumen)}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{doc.nomor_ditetapkan || "-"}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{doc.tentang}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{formatDate(doc.tanggal_ditetapkan)}</td>
                                     <td className="border border-gray-300 px-4 py-3 text-center">{getStatusCell(doc)}</td>
                                 </tr>
                             ))
@@ -242,6 +294,7 @@ export function VerificationTable({
                 </table>
             </div>
 
+            {/* Dialog */}
             <DownloadConfirmationDialog
                 isOpen={downloadConfirm.isOpen}
                 onConfirm={handleDownloadConfirm}

@@ -1,32 +1,62 @@
-// components/tabel-aktivitas.tsx
-"use client";
+"use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react"
+import dayjs from "dayjs"
+import "dayjs/locale/id"
+dayjs.locale("id")
 
 export interface Activity {
-    no: number;
-    waktu: string;
-    aksi: string;
-    user: string;
-    detailPerubahan: string;
+    no: number
+    waktu: string
+    aksi: string
+    user: string
+    detailPerubahan: string
 }
 
-interface TabelAktivitasProps {
-    activities?: Activity[];
-}
+export default function TabelAktivitas() {
+    const [activities, setActivities] = useState<Activity[]>([])
+    const [loading, setLoading] = useState(true)
 
-export default function TabelAktivitas({ activities }: TabelAktivitasProps) {
-    const [searchQuery, setSearchQuery] = useState("");
+    const token = localStorage.getItem('authToken')
 
-    const defaultActivities: Activity[] = activities || [
-        { no: 1, waktu: "21-09-2025 14:32", aksi: "Verifikasi", user: "Kepala Desa", detailPerubahan: "Dokumen disetujui" },
-        { no: 2, waktu: "21-09-2025 13:10", aksi: "Edit", user: "Sekretaris Desa", detailPerubahan: "Nomor : 04 → 07" },
-        { no: 3, waktu: "21-09-2025 12:55", aksi: "Upload", user: "Sekretaris Desa", detailPerubahan: "Dokumen diunggah pertama kali" },
-    ];
 
-    const filteredActivities = defaultActivities.filter(act =>
-        [act.aksi, act.user, act.detailPerubahan].join(" ").toLowerCase().includes(searchQuery.toLowerCase())
-    );
+
+    useEffect(() => {
+        const fetchActivities = async () => {
+            try {
+                const res = await fetch("http://127.0.0.1:8000/api/activity-logs", {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                })
+
+                if (!res.ok) throw new Error("Gagal mengambil data")
+
+
+                const json = await res.json()
+                const logs = json.data?.activity_logs || []
+
+                const formatted = logs.map((item: any, index: number) => ({
+                    no: index + 1,
+                    waktu: dayjs(item.created_at).format("D MMMM YYYY, HH:mm:ss"),
+                    aksi: item.aktivitas,
+                    user: item.user?.name || "-",
+                    detailPerubahan: item.keterangan || `Dokumen ID: ${item.document_id}`
+                }))
+
+                setActivities(formatted)
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchActivities()
+    }, [])
+
+    if (loading) return <p>Loading...</p>
 
     return (
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md">
@@ -37,12 +67,12 @@ export default function TabelAktivitas({ activities }: TabelAktivitasProps) {
                         <th className="border border-gray-300 px-4 py-3 text-left font-semibold">WAKTU</th>
                         <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
                         <th className="border border-gray-300 px-4 py-3 text-left font-semibold">USER</th>
-                        <th className="border border-gray-300 px-4 py-3 text-left font-semibold">DETAIL PERUBAHAN</th>
+                        <th className="border border-gray-300 px-4 py-3 text-left font-semibold">DETAIL AKTIVITAS</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredActivities.length > 0 ? (
-                        filteredActivities.map(act => (
+                    {activities.length > 0 ? (
+                        activities.map((act) => (
                             <tr key={act.no} className="hover:bg-gray-50 transition-colors duration-200">
                                 <td className="border border-gray-300 px-4 py-3">{act.no}</td>
                                 <td className="border border-gray-300 px-4 py-3">{act.waktu}</td>
@@ -61,5 +91,5 @@ export default function TabelAktivitas({ activities }: TabelAktivitasProps) {
                 </tbody>
             </table>
         </div>
-    );
+    )
 }

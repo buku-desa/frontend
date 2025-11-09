@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
 import { SearchBar } from "@/components/kepala-desa/search-bar";
-import { Button } from "@/components/shared/ui/button";
+import { Loader2 } from "lucide-react";
 
-interface Activity {
+dayjs.locale("id");
+
+export interface Activity {
     no: number;
     waktu: string;
     aksi: string;
@@ -14,30 +18,44 @@ interface Activity {
 
 export default function AktivitasPage() {
     const [searchQuery, setSearchQuery] = useState("");
+    const [activities, setActivities] = useState<Activity[]>([]);
+    const [loading, setLoading] = useState(true);
+    const token = localStorage.getItem('authToken');
+    console.log('token', token)
 
-    const activities: Activity[] = [
-        {
-            no: 1,
-            waktu: "21-09-2025 14:32",
-            aksi: "Verifikasi",
-            user: "Kepala Desa",
-            detailPerubahan: "Dokumen disetujui",
-        },
-        {
-            no: 2,
-            waktu: "21-09-2025 13:10",
-            aksi: "Edit",
-            user: "Sekretaris Desa",
-            detailPerubahan: "Nomor : 04 → 07",
-        },
-        {
-            no: 3,
-            waktu: "21-09-2025 12:55",
-            aksi: "Upload",
-            user: "Sekretaris Desa",
-            detailPerubahan: "Dokumen diunggah pertama kali",
-        },
-    ];
+    useEffect(() => {
+        const fetchActivities = async () => {
+            try {
+                const res = await fetch("http://127.0.0.1:8000/api/activity-logs", {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    },
+                });
+
+                if (!res.ok) throw new Error("Gagal mengambil data");
+
+                const json = await res.json();
+                const logs = json.data?.activity_logs || [];
+
+                const formatted: Activity[] = logs.map((item: any, index: number) => ({
+                    no: index + 1,
+                    waktu: dayjs(item.created_at).format("D MMMM YYYY, HH:mm:ss"),
+                    aksi: item.aktivitas,
+                    user: item.user?.name || "-",
+                    detailPerubahan: item.keterangan || `Dokumen ID: ${item.document_id}`,
+                }));
+
+                setActivities(formatted);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchActivities();
+    }, []);
 
     const filteredActivities = activities.filter((act) =>
         [act.aksi, act.user, act.detailPerubahan]
@@ -47,19 +65,13 @@ export default function AktivitasPage() {
     );
 
     return (
-
         <main className="space-y-8">
-
             {/* Header Card & Search */}
             <div className="flex flex-wrap justify-between items-center gap-3 mb-12">
                 {/* Card Aktivitas */}
                 <div className="bg-white border-2 shadow-md rounded-2xl p-4 flex items-center gap-3">
                     <div className="bg-green-50 rounded-xl p-3 flex items-center justify-center">
-                        <svg
-                            className="w-8 h-8 text-green-600"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                        >
+                        <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
                             <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
                             <path d="M16 2h-2v4h2V2zm-6 0H8v4h2V2z" />
@@ -73,47 +85,49 @@ export default function AktivitasPage() {
 
                 {/* Search Bar */}
                 <div className="w-full max-w-[500px]">
-                    <SearchBar
-                        value={searchQuery}
-                        onSearch={(q) => setSearchQuery(q)}
-                    />
+                    <SearchBar value={searchQuery} onSearch={(q) => setSearchQuery(q)} />
                 </div>
             </div>
 
             {/* Tabel Aktivitas */}
-            <div className="bg-white rounded-2xl shadow-md overflow-x-auto">
-                <table className="w-full border-collapse">
-                    <thead>
-                        <tr className="bg-green-800 text-white">
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">WAKTU</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">USER</th>
-                            <th className="border border-gray-300 px-4 py-3 text-left font-semibold">DETAIL PERUBAHAN</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredActivities.length > 0 ? (
-                            filteredActivities.map((act) => (
-                                <tr key={act.no} className="hover:bg-gray-50 transition-colors duration-200">
-                                    <td className="border border-gray-300 px-4 py-3">{act.no}</td>
-                                    <td className="border border-gray-300 px-4 py-3">{act.waktu}</td>
-                                    <td className="border border-gray-300 px-4 py-3">{act.aksi}</td>
-                                    <td className="border border-gray-300 px-4 py-3">{act.user}</td>
-                                    <td className="border border-gray-300 px-4 py-3">{act.detailPerubahan}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={5} className="text-center py-6 text-gray-500 italic">
-                                    Tidak ada aktivitas ditemukan.
-                                </td>
+            {loading ? (
+                <div className="flex items-center justify-center min-h-[200px]">
+                    <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+                </div>
+            ) : (
+                <div className="bg-white rounded-2xl shadow-md overflow-x-auto">
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr className="bg-green-800 text-white">
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">WAKTU</th>
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">USER</th>
+                                <th className="border border-gray-300 px-4 py-3 text-left font-semibold">DETAIL AKTIVITAS</th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
+                        </thead>
+                        <tbody>
+                            {filteredActivities.length > 0 ? (
+                                filteredActivities.map((act) => (
+                                    <tr key={act.no} className="hover:bg-gray-50 transition-colors duration-200">
+                                        <td className="border border-gray-300 px-4 py-3">{act.no}</td>
+                                        <td className="border border-gray-300 px-4 py-3">{act.waktu}</td>
+                                        <td className="border border-gray-300 px-4 py-3">{act.aksi}</td>
+                                        <td className="border border-gray-300 px-4 py-3">{act.user}</td>
+                                        <td className="border border-gray-300 px-4 py-3">{act.detailPerubahan}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={5} className="text-center py-6 text-gray-500 italic">
+                                        Tidak ada aktivitas ditemukan.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </main>
     );
 }

@@ -3,106 +3,61 @@
 import { createContext, useContext, useState, type ReactNode } from "react"
 
 export interface Document {
-    id: number
-    jenis: string
+    id: string
+    jenis_dokumen: string
     nomorTanggalDitetapkan: string
     tentang: string
     tanggal: string
     nomor: string
-    status: "loading" | "verified" | "pending" | "declined"
+    status: "Draft" | "Disetujui" | "Ditolak" | "Diarsipkan"
     verificationDate?: string
 }
 
 interface DocumentsContextType {
     documents: Document[]
-    verifyDocument: (docId: number, verificationDate: string) => void
-    declineDocument: (docId: number) => void
+    setDocuments: React.Dispatch<React.SetStateAction<Document[]>>
+    verifyDocument: (docId: string, verificationDate: string) => void
+    declineDocument: (docId: string) => void
 }
 
 const DocumentsContext = createContext<DocumentsContextType | undefined>(undefined)
 
-const initialDocuments: Document[] = [
-    {
-        id: 1,
-        jenis: "Peraturan",
-        nomorTanggalDitetapkan: "01 Mei 2025",
-        tentang: "Peraturan Desa",
-        tanggal: "Loading",
-        nomor: "07",
-        status: "loading",
-    },
-    {
-        id: 2,
-        jenis: "Peraturan",
-        nomorTanggalDitetapkan: "17 Agustus 2024",
-        tentang: "Peraturan Pembangunan",
-        tanggal: "01 Maret 2025",
-        nomor: "02",
-        status: "verified",
-        verificationDate: "01 Maret 2025",
-    },
-    {
-        id: 3,
-        jenis: "Keputusan",
-        nomorTanggalDitetapkan: "17 Agustus 2024",
-        tentang: "Keputusan Kepala Desa",
-        tanggal: "30 Juli 2025",
-        nomor: "03",
-        status: "verified",
-        verificationDate: "30 Juli 2025",
-    },
-    {
-        id: 4,
-        jenis: "",
-        nomorTanggalDitetapkan: "",
-        tentang: "",
-        tanggal: "",
-        nomor: "",
-        status: "pending",
-    },
-    {
-        id: 5,
-        jenis: "",
-        nomorTanggalDitetapkan: "",
-        tentang: "",
-        tanggal: "",
-        nomor: "",
-        status: "pending",
-    },
-]
-
 export function DocumentsProvider({ children }: { children: ReactNode }) {
-    const [documents, setDocuments] = useState<Document[]>(initialDocuments)
+    const [documents, setDocuments] = useState<Document[]>([])
 
-    const verifyDocument = (docId: number, verificationDate: string) => {
+    const verifyDocument = (docId: string, verificationDate: string) => {
         setDocuments((prevDocs) =>
             prevDocs.map((doc) =>
                 doc.id === docId
                     ? {
                         ...doc,
-                        status: "verified" as const,
+                        status: "Disetujui",
                         verificationDate,
                         tanggal: verificationDate,
                     }
-                    : doc,
-            ),
+                    : doc
+            )
         )
     }
 
-    const declineDocument = (docId: number) => {
+    const declineDocument = (docId: string) => {
         setDocuments((prevDocs) =>
             prevDocs.map((doc) =>
                 doc.id === docId
                     ? {
                         ...doc,
-                        status: "declined" as const,
+                        status: "Ditolak",
                     }
-                    : doc,
-            ),
+                    : doc
+            )
         )
     }
 
-    return <DocumentsContext.Provider value={{ documents, verifyDocument, declineDocument }}>{children}</DocumentsContext.Provider>
+    return (
+        <DocumentsContext.Provider value={{ documents, setDocuments, verifyDocument, declineDocument }}>
+            {children}
+        </DocumentsContext.Provider>
+    )
 }
 
 export function useDocuments() {
