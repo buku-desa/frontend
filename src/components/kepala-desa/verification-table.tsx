@@ -75,7 +75,7 @@ export function VerificationTable({
         if (!doc) return
 
         try {
-            const token = localStorage.getItem("token")
+            const token = localStorage.getItem("authToken")
             const response = await axios.get(`${API_BASE_URL}/documents/${doc.id}/download`, {
                 responseType: "blob",
                 withCredentials: true,
@@ -202,13 +202,13 @@ export function VerificationTable({
                         </>
                     )}
 
-                    {/* <Button
+                    <Button
                         size="sm"
                         className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
                         onClick={() => setDownloadConfirm({ isOpen: true, docId: doc.id })}
                     >
                         <Download size={18} />
-                    </Button> */}
+                    </Button>
 
                     {/* Tombol verifikasi & tolak hanya untuk draft */}
                     {!isDocumentPage && status === "Draft" && (

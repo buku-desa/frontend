@@ -3,7 +3,7 @@
 import type { NextPage } from 'next'
 import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
-import BeritaCardHorizontal from '@/components/warga/BeritaCardHorizontal'
+import BeritaCard from '@/components/warga/BeritaCard'
 import bukuDataRaw from '@/../data/bukuData'
 
 type BeritaItem = {
@@ -126,7 +126,7 @@ const BeritaDesa: NextPage = () => {
 
                 <div className="space-y-4">
                     {filteredData.map((berita, index) => (
-                        <BeritaCardHorizontal
+                        <BeritaCard
                             key={berita.id}
                             title={berita.title}
                             date={berita.date}

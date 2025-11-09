@@ -273,6 +273,7 @@ export default function DashboardPage() {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return "-"
     return new Date(dateString).toLocaleDateString("id-ID", {
       day: "numeric",
       month: "long",
@@ -379,10 +380,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Documents Table - Recent Approved Documents */}
-      <div className="bg-white rounded-lg overflow-hidden border border-gray-200 mb-12">
-        <div className="p-4 bg-green-50 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">Dokumen Terbaru</h2>
-        </div>
+      <div className="bg-white rounded-lg overflow-hidden mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Dokumen Terbaru</h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px]">
             <thead className="bg-green-800 text-white">
@@ -485,23 +484,36 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {verificationDocuments.map((doc, index) => (
-                  <tr key={doc.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{getJenisLabel(doc.jenis_dokumen)}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {doc.nomor_ditetapkan || "-"}<br />
-                      {formatDate(doc.tanggal_ditetapkan)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{doc.tentang}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Menunggu Verifikasi
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+              {verificationDocuments.length === 0 ? (
+            // Jika tidak ada data, tampilkan baris ini
+            <tr>
+              <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                Tidak ada dokumen yang menunggu untuk diverifikasi.
+              </td>
+            </tr>
+          ) : (
+            // Jika ada data, tampilkan hasil map
+            verificationDocuments.map((doc, index) => (
+              <tr key={doc.id} className="hover:bg-gray-50">
+                <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
+                <td className="px-4 py-3 text-sm text-gray-900">{getJenisLabel(doc.jenis_dokumen)}</td>
+                <td className="px-4 py-3 text-sm text-gray-900">
+                  {doc.nomor_ditetapkan || "-"}<br />
+                  {formatDate(doc.tanggal_ditetapkan)}
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-900">{doc.tentang}</td>
+                <td className="px-4 py-3 text-sm">
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    Menunggu Verifikasi
+                  </span>
+                </td>
+              </tr>
+            ))
+          )}
+
+          {/* --- AKHIR PERUBAHAN --- */}
+          
+        </tbody>
             </table>
           </div>
         </div>

@@ -117,13 +117,11 @@ export function DocumentCard() {
             document.body.removeChild(link)
             window.URL.revokeObjectURL(url)
 
-            alert(`✅ Laporan ${periodLabel} berhasil diunduh!`)
             setShowPopup(false)
             setSelectedPeriod(null)
 
         } catch (error) {
             console.error("❌ Download gagal:", error)
-            alert("Gagal mengunduh laporan. Silakan coba lagi.")
         } finally {
             setIsDownloading(false)
         }
