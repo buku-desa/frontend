@@ -15,18 +15,16 @@ export default function AktivitasPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalActivities, setTotalActivities] = useState(0);
 
-  // Fetch activities
+  // Fetch activities when page changes
   useEffect(() => {
     fetchActivities();
   }, [currentPage]);
 
-  // Live search with debounce
+  // Handle search with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setCurrentPage(1);
-      fetchActivities();
     }, 500);
 
     return () => clearTimeout(timeoutId);
@@ -40,16 +38,22 @@ export default function AktivitasPage() {
       }
       setError(null);
 
-      const params: any = { page: currentPage };
+      const params: any = {};
 
       if (searchQuery) {
         params.search = searchQuery;
       }
 
+      // Fetch ALL activities (no server pagination)
       const response = await getActivityLogs(params);
+      console.log("🔍 DEBUG: Full API Response:", response);
+      console.log("🔍 DEBUG: Activity Logs:", response.data.activity_logs);
+      // Log each activity string
+      response.data.activity_logs.forEach((log: any, i: number) => {
+        console.log(`🔍 [${i}] aktivitas: "${log.aktivitas}"`);
+      });
       setActivities(response.data.activity_logs);
-      setTotalActivities(response.meta.pagination.total);
-      setTotalPages(response.meta.pagination.total_pages);
+      setTotalPages(Math.ceil(response.data.activity_logs.length / 10));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -76,18 +80,18 @@ export default function AktivitasPage() {
 
   const getActionBadge = (action: string) => {
     // Try to extract action from aktivitas string
-    if (action.includes("upload") || action.includes("Upload") || action.includes("ditambahkan")) {
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Upload</span>;
-    } else if (action.includes("edit") || action.includes("Edit") || action.includes("diupdate")) {
+    if (action.includes("created") || action.includes("upload") || action.includes("Upload") || action.includes("ditambahkan") || action.includes("dibuat")) {
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Buat</span>;
+    } else if (action.includes("updated") || action.includes("edit") || action.includes("Edit") || action.includes("diupdate") || action.includes("diperbarui")) {
       return <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Edit</span>;
-    } else if (action.includes("setuju") || action.includes("Setuju") || action.includes("Disetujui")) {
+    } else if (action.includes("approved") || action.includes("setuju") || action.includes("Setuju") || action.includes("Disetujui")) {
       return (
-        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Verifikasi</span>
+        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Disetujui</span>
       );
-    } else if (action.includes("arsip") || action.includes("Arsip")) {
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Arsip</span>;
-    } else if (action.includes("hapus") || action.includes("Hapus") || action.includes("Delete")) {
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Hapus</span>;
+    } else if (action.includes("archived") || action.includes("arsip") || action.includes("Arsip") || action.includes("diarsipkan")) {
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Arsip</span>;
+    } else if (action.includes("rejected") || action.includes("hapus") || action.includes("Hapus") || action.includes("Delete") || action.includes("ditolak")) {
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Ditolak</span>;
     } else {
       return <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Lainnya</span>;
     }
@@ -100,6 +104,11 @@ export default function AktivitasPage() {
       </div>
     );
   }
+
+  // Client-side pagination
+  const startIndex = (currentPage - 1) * 10;
+  const endIndex = startIndex + 10;
+  const displayedActivities = activities.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-8">
@@ -115,7 +124,7 @@ export default function AktivitasPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Aktivitas</h3>
-            <p className="text-sm text-gray-600">Total : {totalActivities}</p>
+            <p className="text-sm text-gray-600">Total : {activities.length}</p>
           </div>
         </div>
 
@@ -155,19 +164,19 @@ export default function AktivitasPage() {
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">AKSI</th>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">USER</th>
               <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                DETAIL AKTIVITAS
+                DETAIL PERUBAHAN
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {activities.length === 0 ? (
+            {displayedActivities.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                   Tidak ada activity logs
                 </td>
               </tr>
             ) : (
-              activities.map((activity, index) => (
+              displayedActivities.map((activity, index) => (
                 <tr key={activity.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-900">
                     {(currentPage - 1) * 10 + index + 1}
@@ -179,7 +188,7 @@ export default function AktivitasPage() {
                     <br />
                     <span className="text-xs text-gray-500">{activity.user?.role}</span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{activity.aktivitas}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{activity.keterangan || "-"}</td>
                 </tr>
               ))
             )}
@@ -191,8 +200,8 @@ export default function AktivitasPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
           <div className="text-sm text-gray-700">
-            Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, totalActivities)} of{" "}
-            {totalActivities} results
+            Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, activities.length)} of{" "}
+            {activities.length} results
           </div>
           <div className="flex gap-2">
             <button

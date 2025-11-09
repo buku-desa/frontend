@@ -16,7 +16,6 @@ export default function ArsipPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalArchives, setTotalArchives] = useState(0);
   const perPage = 10;
 
   // Modals
@@ -26,16 +25,15 @@ export default function ArsipPage() {
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [selectedArchive, setSelectedArchive] = useState<Archive | null>(null);
 
-  // Fetch archives
+  // Fetch archives when page changes
   useEffect(() => {
     fetchArchives();
   }, [currentPage]);
 
-  // Live search with debounce
+  // Handle search with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setCurrentPage(1);
-      fetchArchives();
     }, 500);
 
     return () => clearTimeout(timeoutId);
@@ -49,20 +47,21 @@ export default function ArsipPage() {
       }
       setError(null);
 
-      const params: any = {
-        per_page: perPage,
-        page: currentPage,
-      };
+      const params: any = {};
 
       if (searchQuery) {
         params.search = searchQuery;
       }
 
+      // Fetch ALL archives (no server pagination)
       const response = await getArchives(params);
+      console.log("Archives full response:", response);
+      console.log("Archives meta:", response.meta);
+      console.log("Archives total:", response.meta?.total, typeof response.meta?.total);
 
+      // Set all archives
       setArchives(response.data);
-      setTotalArchives(response.meta.total);
-      setTotalPages(Math.ceil(response.meta.total / perPage));
+      setTotalPages(Math.ceil(response.data.length / perPage));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -149,6 +148,11 @@ export default function ArsipPage() {
     );
   }
 
+  // Client-side pagination
+  const startIndex = (currentPage - 1) * perPage;
+  const endIndex = startIndex + perPage;
+  const displayedArchives = archives.slice(startIndex, endIndex);
+
   return (
     <div className="space-y-8">
       {/* Arsip Card & Search Bar */}
@@ -161,7 +165,7 @@ export default function ArsipPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Arsip</h3>
-            <p className="text-sm text-gray-600">Total : {totalArchives}</p>
+            <p className="text-sm text-gray-600">Total : {archives.length}</p>
           </div>
         </div>
 
@@ -197,42 +201,34 @@ export default function ArsipPage() {
           <thead>
             <tr className="bg-green-800 text-white">
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NO</th>
-              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">JENIS</th>
-              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">
-                NOMOR & TANGGAL DITETAPKAN
-              </th>
-              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TENTANG</th>
+              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">NOMOR ARSIP</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TANGGAL ARSIP</th>
+              <th className="border border-gray-300 px-4 py-3 text-left font-semibold">TENTANG</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">KETERANGAN</th>
               <th className="border border-gray-300 px-4 py-3 text-left font-semibold">AKSI</th>
             </tr>
           </thead>
           <tbody>
-            {archives.length === 0 ? (
+            {displayedArchives.length === 0 ? (
               <tr>
-                <td colSpan={7} className="border border-gray-300 px-4 py-8 text-center text-gray-500">
+                <td colSpan={6} className="border border-gray-300 px-4 py-8 text-center text-gray-500">
                   Tidak ada arsip
                 </td>
               </tr>
             ) : (
-              archives.map((archive, index) => (
+              displayedArchives.map((archive, index) => (
                 <tr key={archive.id} className="hover:bg-gray-50">
                   <td className="border border-gray-300 px-4 py-3 text-gray-900">
                     {(currentPage - 1) * perPage + index + 1}
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-gray-900">
-                    {archive.document ? getJenisLabel(archive.document.jenis_dokumen) : "-"}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-3 text-gray-900">
-                    {archive.document?.nomor_ditetapkan || "-"}
-                    <br />
-                    {archive.document && formatDate(archive.document.tanggal_ditetapkan)}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-3 text-gray-900">
-                    {archive.document?.tentang || "-"}
+                    {archive.nomor_arsip || "-"}
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-gray-900">
                     {formatDate(archive.tanggal_arsip)}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-3 text-gray-900">
+                    {archive.document?.tentang || "-"}
                   </td>
                   <td className="border border-gray-300 px-4 py-3 text-gray-900">
                     {archive.keterangan || "-"}
@@ -266,8 +262,8 @@ export default function ArsipPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
           <div className="text-sm text-gray-700">
-            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, totalArchives)} of{" "}
-            {totalArchives} results
+            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, archives.length)} of{" "}
+            {archives.length} results
           </div>
           <div className="flex gap-2">
             <button

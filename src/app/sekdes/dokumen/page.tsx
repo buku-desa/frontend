@@ -22,7 +22,6 @@ export default function DokumenPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalDocuments, setTotalDocuments] = useState(0);
   const perPage = 10;
 
   // Filter
@@ -39,25 +38,31 @@ export default function DokumenPage() {
   const [selectedDoc, setSelectedDoc] = useState<APIDocument | null>(null);
 
   // Form data for edit
-  const [formData, setFormData] = useState({
-    jenis_dokumen: "peraturan_desa" as const,
+  const [formData, setFormData] = useState<{
+    jenis_dokumen: 'peraturan_desa' | 'peraturan_kepala_desa' | 'peraturan_bersama_kepala_desa';
+    nomor_ditetapkan: string;
+    tanggal_ditetapkan: string;
+    tentang: string;
+    keterangan: string;
+    file_upload: File | undefined;
+  }>({
+    jenis_dokumen: "peraturan_desa",
     nomor_ditetapkan: "",
     tanggal_ditetapkan: "",
     tentang: "",
     keterangan: "",
-    file_upload: null as File | null,
+    file_upload: undefined,
   });
 
-  // Fetch documents
+  // Fetch documents when page or filters change
   useEffect(() => {
     fetchDocuments();
   }, [currentPage, statusFilter, jenisFilter]);
 
-  // Live search with debounce
+  // Handle search with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setCurrentPage(1);
-      fetchDocuments();
     }, 500);
 
     return () => clearTimeout(timeoutId);
@@ -71,10 +76,7 @@ export default function DokumenPage() {
       }
       setError(null);
 
-      const params: any = {
-        per_page: perPage,
-        page: currentPage,
-      };
+      const params: any = {};
 
       if (statusFilter !== "all") {
         params.status = statusFilter;
@@ -88,10 +90,15 @@ export default function DokumenPage() {
         params.search = searchQuery;
       }
 
+      // Fetch ALL documents (no server pagination)
       const response = await getDocuments(params);
+      console.log("Documents full response:", response);
+      console.log("Documents meta:", response.meta);
+      console.log("Documents total:", response.meta?.total, typeof response.meta?.total);
+
+      // Set all documents
       setDocuments(response.data);
-      setTotalDocuments(response.meta.total);
-      setTotalPages(Math.ceil(response.meta.total / perPage));
+      setTotalPages(Math.ceil(response.data.length / perPage));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -132,7 +139,9 @@ export default function DokumenPage() {
     if (!selectedDoc) return;
 
     try {
+      console.log("🔽 Download starting for document:", selectedDoc.id);
       const blob = await downloadDocument(selectedDoc.id);
+      console.log("🔽 Blob received:", blob);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -141,8 +150,14 @@ export default function DokumenPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      console.log("✅ Download completed successfully");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Gagal mendownload dokumen");
+      console.error("❌ Download error full object:", err);
+      console.error("❌ Error response:", err.response);
+      console.error("❌ Error message:", err.message);
+      console.error("❌ Error status:", err.response?.status);
+      console.error("❌ Error data:", err.response?.data);
+      alert(err.response?.data?.message || err.message || "Gagal mendownload dokumen");
     } finally {
       setIsDownloadModalOpen(false);
     }
@@ -156,7 +171,7 @@ export default function DokumenPage() {
       tanggal_ditetapkan: doc.tanggal_ditetapkan || "",
       tentang: doc.tentang,
       keterangan: doc.keterangan || "",
-      file_upload: null,
+      file_upload: undefined,
     });
     setIsEditModalOpen(true);
   };
@@ -232,6 +247,11 @@ export default function DokumenPage() {
     );
   }
 
+  // Client-side pagination
+  const startIndex = (currentPage - 1) * perPage;
+  const endIndex = startIndex + perPage;
+  const displayedDocuments = documents.slice(startIndex, endIndex);
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -243,7 +263,7 @@ export default function DokumenPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Dokumen</h3>
-            <p className="text-sm text-gray-600">Total : {totalDocuments}</p>
+            <p className="text-sm text-gray-600">Total : {documents.length}</p>
           </div>
         </div>
 
@@ -329,14 +349,14 @@ export default function DokumenPage() {
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            {documents.length === 0 ? (
+            {displayedDocuments.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
                   Tidak ada dokumen
                 </td>
               </tr>
             ) : (
-              documents.map((doc, index) => (
+              displayedDocuments.map((doc, index) => (
                 <tr key={doc.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {(currentPage - 1) * perPage + index + 1}
@@ -400,8 +420,8 @@ export default function DokumenPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
           <div className="text-sm text-gray-700">
-            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, totalDocuments)} of{" "}
-            {totalDocuments} results
+            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, documents.length)} of{" "}
+            {documents.length} results
           </div>
           <div className="flex gap-2">
             <button
@@ -524,7 +544,7 @@ export default function DokumenPage() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      file_upload: e.target.files?.[0] || null,
+                      file_upload: e.target.files?.[0] || undefined,
                     })
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"

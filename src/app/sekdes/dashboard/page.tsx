@@ -15,7 +15,7 @@ import {
   type CreateDocumentData,
 } from "@/lib/api";
 import { getActivityLogs, type ActivityLog } from "@/lib/api";
-import { createArchive } from "@/lib/api";
+import { createArchive, getArchives } from "@/lib/api";
 
 export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,9 +26,10 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Stats
-  const [totalDocuments, setTotalDocuments] = useState(0);
-  const [totalArchives, setTotalArchives] = useState(0);
+  // All data for stats
+  const [allDocuments, setAllDocuments] = useState<APIDocument[]>([]);
+  const [allArchives, setAllArchives] = useState<any[]>([]);
+  const [allActivities, setAllActivities] = useState<ActivityLog[]>([]);
 
   // Modal states
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
@@ -41,13 +42,20 @@ export default function DashboardPage() {
   const [selectedDoc, setSelectedDoc] = useState<APIDocument | null>(null);
 
   // Form states for add/edit
-  const [formData, setFormData] = useState({
-    jenis_dokumen: "peraturan_desa" as const,
+  const [formData, setFormData] = useState<{
+    jenis_dokumen: 'peraturan_desa' | 'peraturan_kepala_desa' | 'peraturan_bersama_kepala_desa';
+    nomor_ditetapkan: string;
+    tanggal_ditetapkan: string;
+    tentang: string;
+    keterangan: string;
+    file_upload: File | undefined;
+  }>({
+    jenis_dokumen: "peraturan_desa",
     nomor_ditetapkan: "",
     tanggal_ditetapkan: "",
     tentang: "",
     keterangan: "",
-    file_upload: null as File | null,
+    file_upload: undefined,
   });
 
   // Fetch data on mount
@@ -55,11 +63,11 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  // Live search with debounce
+  // Handle search with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       fetchData(searchQuery || undefined);
-    }, 500); // 500ms debounce
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
@@ -76,11 +84,13 @@ export default function DashboardPage() {
 
       const searchParams = search ? { search } : {};
 
-      // Fetch recent documents (approved)
-      const docsResponse = await getDocuments({ status: "Disetujui", per_page: 3, ...searchParams });
-      console.log("Documents response:", docsResponse);
-      setDocuments(docsResponse.data);
-      setTotalDocuments(docsResponse.meta.total);
+      // Fetch all documents for total count (all statuses)
+      const allDocsResponse = await getDocuments({ ...searchParams });
+      setAllDocuments(allDocsResponse.data);
+
+      // Fetch recent documents (approved) for display - just take first 3 from approved ones
+      const approvedDocs = allDocsResponse.data.filter((d: APIDocument) => d.status === "Disetujui").slice(0, 3);
+      setDocuments(approvedDocs);
 
       // Fetch documents pending verification (Draft status)
       const verifyResponse = await getDocuments({ status: "Draft", per_page: 4, ...searchParams });
@@ -91,6 +101,17 @@ export default function DashboardPage() {
       const logsResponse = await getActivityLogs({ ...(search ? { search } : {}) });
       console.log("Activity logs response:", logsResponse);
       setActivities(logsResponse.data.activity_logs.slice(0, 3));
+
+      // Fetch all archives for total count
+      const archivesResponse = await getArchives({});
+      console.log("Archives response:", archivesResponse);
+      console.log("Archives total type:", typeof archivesResponse.meta.total, archivesResponse.meta.total);
+      setAllArchives(archivesResponse.data);
+
+      // Fetch all activities for total count
+      const allLogsResponse = await getActivityLogs({});
+      setAllActivities(allLogsResponse.data.activity_logs);
+      console.log("✅ Data fetching complete");
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -171,7 +192,7 @@ export default function DashboardPage() {
       tanggal_ditetapkan: doc.tanggal_ditetapkan || "",
       tentang: doc.tentang,
       keterangan: doc.keterangan || "",
-      file_upload: null,
+      file_upload: undefined,
     });
     setIsEditModalOpen(true);
   };
@@ -202,7 +223,7 @@ export default function DashboardPage() {
       tanggal_ditetapkan: "",
       tentang: "",
       keterangan: "",
-      file_upload: null,
+      file_upload: undefined,
     });
     setIsAddModalOpen(true);
   };
@@ -271,7 +292,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <p className="text-red-600 mb-4">{error}</p>
-        <Button onClick={fetchData}>Coba Lagi</Button>
+        <Button onClick={() => fetchData()}>Coba Lagi</Button>
       </div>
     );
   }
@@ -283,37 +304,37 @@ export default function DashboardPage() {
         {/* Dokumen Card */}
         <Link
           href="/sekdes/dokumen"
-          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
+          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full lg:w-auto lg:min-w-[320px] cursor-pointer"
         >
           <div className="bg-green-50 rounded-lg p-3 shrink-0">
             <FileText className="w-10 h-10 text-green-600" strokeWidth={1.5} />
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Dokumen</h3>
-            <p className="text-sm text-gray-600">Total : {totalDocuments}</p>
+            <p className="text-sm text-gray-600">Total : {allDocuments.length}</p>
           </div>
         </Link>
 
         {/* Arsip Card */}
         <Link
           href="/sekdes/arsip"
-          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
+          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full lg:w-auto lg:min-w-[320px] cursor-pointer"
         >
-          <div className="bg-green-50 rounded-lg p-3 shrink-0">
+          <div className="bg-green-100 rounded-lg p-3 shrink-0">
             <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
               <path d="M3 4h18v4H3V4zm0 6h18v10H3V10zm4 2v6h10v-6H7z" />
             </svg>
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Arsip</h3>
-            <p className="text-sm text-gray-600">Total : {totalArchives}</p>
+            <p className="text-sm text-gray-600">Total : {allArchives.length}</p>
           </div>
         </Link>
 
         {/* Aktivitas Card */}
         <Link
           href="/sekdes/aktivitas"
-          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
+          className="bg-white rounded-2xl border-2 border-gray-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow w-full lg:w-auto lg:min-w-[320px] cursor-pointer"
         >
           <div className="bg-green-50 rounded-lg p-3 shrink-0">
             <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
@@ -323,7 +344,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Aktivitas</h3>
-            <p className="text-sm text-gray-600">Log Aktivitas</p>
+            <p className="text-sm text-gray-600">Total : {allActivities.length}</p>
           </div>
         </Link>
       </div>
@@ -622,7 +643,7 @@ export default function DashboardPage() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      file_upload: e.target.files?.[0] || null,
+                      file_upload: e.target.files?.[0] || undefined,
                     })
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"
@@ -747,7 +768,7 @@ export default function DashboardPage() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      file_upload: e.target.files?.[0] || null,
+                      file_upload: e.target.files?.[0] || undefined,
                     })
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2D5F2E]"

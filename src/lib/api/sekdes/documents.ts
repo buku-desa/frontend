@@ -66,3 +66,12 @@ export const deleteDocument = async (id: string): Promise<{ message: string }> =
   const response = await apiClient.delete(`/documents/${id}`);
   return response.data;
 };
+
+export const downloadDocument = async (id: string): Promise<Blob> => {
+  const response = await apiClient.get(`/documents/${id}/download`, {
+    // Penting: beri tahu axios untuk mengharapkan file (blob), bukan JSON
+    responseType: 'blob',
+  });
+  // response.data akan berisi file blob itu sendiri
+  return response.data;
+};

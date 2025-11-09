@@ -213,13 +213,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Info Credentials untuk Testing */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-xs">
-            <p className="font-semibold text-blue-800 mb-1">Test Credentials:</p>
-            <p className="text-blue-700">Sekdes: <code className="bg-blue-100 px-1 rounded">sekdes</code> / <code className="bg-blue-100 px-1 rounded">password</code></p>
-            <p className="text-blue-700">Kepdes: <code className="bg-blue-100 px-1 rounded">kepdes</code> / <code className="bg-blue-100 px-1 rounded">password</code></p>
-          </div>
-
           {/* Back to Home Link */}
           <div className="mt-8 text-center">
             <a

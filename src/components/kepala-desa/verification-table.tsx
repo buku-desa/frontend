@@ -93,7 +93,6 @@ export function VerificationTable({
             window.URL.revokeObjectURL(blobUrl)
         } catch (error) {
             console.error("Download gagal:", error)
-            alert("Gagal mengunduh dokumen.")
         }
 
         setDownloadConfirm({ isOpen: false, docId: null })
@@ -103,7 +102,7 @@ export function VerificationTable({
     const handleVerifyConfirm = async () => {
         if (!verifyConfirm.docId) return
         try {
-            const token = localStorage.getItem("token")
+            const token = localStorage.getItem("authToken")
             await axios.put(
                 `${API_BASE_URL}/documents/${verifyConfirm.docId}/approve`,
                 {},
@@ -115,11 +114,9 @@ export function VerificationTable({
                     },
                 }
             )
-            alert("✅ Dokumen berhasil diverifikasi")
             onVerify?.(verifyConfirm.docId)
         } catch (error) {
             console.error("Verifikasi gagal:", error)
-            alert("Gagal memverifikasi dokumen.")
         }
         setVerifyConfirm({ isOpen: false, docId: null })
     }
@@ -128,7 +125,7 @@ export function VerificationTable({
     const handleDeclineConfirm = async () => {
         if (!declineConfirm.docId) return
         try {
-            const token = localStorage.getItem("token")
+            const token = localStorage.getItem("authToken")
             await axios.post(
                 `${API_BASE_URL}/documents/${declineConfirm.docId}/reject`,
                 { catatan: "Dokumen ditolak" },
@@ -140,11 +137,9 @@ export function VerificationTable({
                     },
                 }
             )
-            alert("❌ Dokumen berhasil ditolak")
             onDecline?.(declineConfirm.docId)
         } catch (error) {
             console.error("Penolakan gagal:", error)
-            alert("Gagal menolak dokumen.")
         }
         setDeclineConfirm({ isOpen: false, docId: null })
     }
@@ -256,7 +251,7 @@ export function VerificationTable({
 
 
     // 🔹 HEADER
-    const headers = ["No", "Jenis Dokumen", "Nomor Ditetapkan", "Tentang", "Tanggal Ditetapkan", "Status"]
+    const headers = ["No", "Jenis Dokumen", "Nomor Ditetapkan", "Tanggal Ditetapkan", "Tentang", "Status"]
 
     return (
         <>
@@ -278,8 +273,8 @@ export function VerificationTable({
                                     <td className="border border-gray-300 px-4 py-3">{index + 1}</td>
                                     <td className="border border-gray-300 px-4 py-3">{formatText(doc.jenis_dokumen)}</td>
                                     <td className="border border-gray-300 px-4 py-3">{doc.nomor_ditetapkan || "-"}</td>
-                                    <td className="border border-gray-300 px-4 py-3">{doc.tentang}</td>
                                     <td className="border border-gray-300 px-4 py-3">{formatDate(doc.tanggal_ditetapkan)}</td>
+                                    <td className="border border-gray-300 px-4 py-3">{doc.tentang}</td>
                                     <td className="border border-gray-300 px-4 py-3 text-center">{getStatusCell(doc)}</td>
                                 </tr>
                             ))

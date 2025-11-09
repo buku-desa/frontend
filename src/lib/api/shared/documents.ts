@@ -41,17 +41,16 @@ export const getDocument = async (id: string): Promise<{ data: Document }> => {
   return response.data;
 };
 
-// Download document
+// Download document (public endpoint - no auth required)
 export const downloadDocument = async (id: string): Promise<Blob> => {
-  const response = await apiClient.get(`/documents/${id}/download`, {
+  const response = await apiClient.get(`/public/documents/${id}/download`, {
     responseType: 'blob',
   });
   return response.data;
 };
 
-// Get download URL for viewing
+// Get download URL for viewing (public endpoint - no auth required)
 export const getDocumentDownloadUrl = (id: string): string => {
   const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-  const token = localStorage.getItem('authToken');
-  return `${baseURL}/documents/${id}/download?token=${token}`;
+  return `${baseURL}/public/documents/${id}/download`;
 };
