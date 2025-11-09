@@ -22,7 +22,7 @@ export default function Header() {
               <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="text-lg font-semibold text-emerald-900">Caturtunggal</span>
+          <span className="text-lg font-semibold text-emerald-900">SIMBADES</span>
         </div>
         <nav className="hidden md:flex gap-6 items-center text-sm">
           <Link href="/" className={linkClass('/') } aria-current={router.pathname === '/' ? 'page' : undefined}>
