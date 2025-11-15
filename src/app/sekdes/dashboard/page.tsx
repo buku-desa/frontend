@@ -3,7 +3,7 @@
 import { Button } from "@/components/shared/ui/button";
 import { Eye, Download, Edit3, Archive, Loader2 } from "lucide-react";
 import { FileText } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   getDocuments,
@@ -16,6 +16,7 @@ import {
 } from "@/lib/api";
 import { getActivityLogs, type ActivityLog } from "@/lib/api";
 import { createArchive, getArchives } from "@/lib/api";
+import SearchBarSekdes from "@/components/sekdes/SearchBarSekdes";
 
 export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,16 +64,7 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  // Handle search with debounce
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchData(searchQuery || undefined);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
-
-  const fetchData = async (search?: string) => {
+  const fetchData = async () => {
     try {
       // Only show loading screen on initial page load
       if (isInitialLoad) {
@@ -82,25 +74,23 @@ export default function DashboardPage() {
 
       console.log("Fetching data from API...");
 
-      const searchParams = search ? { search } : {};
-
       // Fetch all documents for total count (all statuses)
-      const allDocsResponse = await getDocuments({ ...searchParams });
+      const allDocsResponse = await getDocuments({});
       setAllDocuments(allDocsResponse.data);
 
-      // Fetch recent documents (approved) for display - just take first 3 from approved ones
-      const approvedDocs = allDocsResponse.data.filter((d: APIDocument) => d.status === "Disetujui").slice(0, 3);
+      // Fetch all documents (approved) for display - will be filtered by useMemo
+      const approvedDocs = allDocsResponse.data.filter((d: APIDocument) => d.status === "Disetujui");
       setDocuments(approvedDocs);
 
       // Fetch documents pending verification (Draft status)
-      const verifyResponse = await getDocuments({ status: "Draft", per_page: 4, ...searchParams });
+      const verifyResponse = await getDocuments({ status: "Draft" });
       console.log("Verification docs response:", verifyResponse);
       setVerificationDocuments(verifyResponse.data);
 
       // Fetch recent activity logs
-      const logsResponse = await getActivityLogs({ ...(search ? { search } : {}) });
+      const logsResponse = await getActivityLogs({});
       console.log("Activity logs response:", logsResponse);
-      setActivities(logsResponse.data.activity_logs.slice(0, 3));
+      setActivities(logsResponse.data.activity_logs);
 
       // Fetch all archives for total count
       const archivesResponse = await getArchives({});
@@ -140,6 +130,52 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
+
+  // Client-side filtering dengan useMemo (live search)
+  const filteredDocuments = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return documents.slice(0, 3); // Show only first 3
+    }
+
+    const query = searchQuery.toLowerCase();
+    return documents.filter((doc) => {
+      return (
+        doc.tentang?.toLowerCase().includes(query) ||
+        doc.nomor_ditetapkan?.toLowerCase().includes(query) ||
+        doc.jenis_dokumen?.toLowerCase().includes(query)
+      );
+    }).slice(0, 3);
+  }, [searchQuery, documents]);
+
+  const filteredVerificationDocuments = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return verificationDocuments.slice(0, 4); // Show only first 4
+    }
+
+    const query = searchQuery.toLowerCase();
+    return verificationDocuments.filter((doc) => {
+      return (
+        doc.tentang?.toLowerCase().includes(query) ||
+        doc.nomor_ditetapkan?.toLowerCase().includes(query) ||
+        doc.jenis_dokumen?.toLowerCase().includes(query)
+      );
+    }).slice(0, 4);
+  }, [searchQuery, verificationDocuments]);
+
+  const filteredActivities = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return activities.slice(0, 3); // Show only first 3
+    }
+
+    const query = searchQuery.toLowerCase();
+    return activities.filter((act) => {
+      return (
+        act.aktivitas?.toLowerCase().includes(query) ||
+        act.user?.name?.toLowerCase().includes(query) ||
+        act.keterangan?.toLowerCase().includes(query)
+      );
+    }).slice(0, 3);
+  }, [searchQuery, activities]);
 
   // Handler functions
   const handleView = async (doc: APIDocument) => {
@@ -358,30 +394,14 @@ export default function DashboardPage() {
         >
           <span className="text-xl font-bold">+</span> Tambah Dokumen
         </button>
-        <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-full px-5 py-2">
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Cari judul, nomor, atau jenis dokumen"
-            className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder:text-gray-500"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && fetchData(searchQuery || undefined)}
-          />
-          <button
-            onClick={() => fetchData(searchQuery || undefined)}
-            className="bg-green-700 hover:bg-green-800 text-white px-5 py-1.5 rounded-full font-medium text-sm transition-colors"
-          >
-            Search
-          </button>
+        <div className="flex-1">
+          <SearchBarSekdes value={searchQuery} onChange={setSearchQuery} />
         </div>
       </div>
 
       {/* Documents Table - Recent Approved Documents */}
-      <div className="bg-white rounded-lg overflow-hidden mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Dokumen Terbaru</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Dokumen Terbaru</h2>
+      <div className="bg-white rounded-lg overflow-hidden border border-gray-200 mb-12">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px]">
             <thead className="bg-green-800 text-white">
@@ -397,7 +417,7 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {documents.map((doc, index) => (
+              {filteredDocuments.map((doc, index) => (
                 <tr key={doc.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
                   <td className="px-4 py-3 text-sm text-gray-900">{getJenisLabel(doc.jenis_dokumen)}</td>
@@ -484,7 +504,7 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-              {verificationDocuments.length === 0 ? (
+              {filteredVerificationDocuments.length === 0 ? (
             // Jika tidak ada data, tampilkan baris ini
             <tr>
               <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
@@ -493,7 +513,7 @@ export default function DashboardPage() {
             </tr>
           ) : (
             // Jika ada data, tampilkan hasil map
-            verificationDocuments.map((doc, index) => (
+            filteredVerificationDocuments.map((doc, index) => (
               <tr key={doc.id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
                 <td className="px-4 py-3 text-sm text-gray-900">{getJenisLabel(doc.jenis_dokumen)}</td>
@@ -534,7 +554,7 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {activities.map((activity, index) => (
+                {filteredActivities.map((activity, index) => (
                   <tr key={activity.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm text-gray-900">{index + 1}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">

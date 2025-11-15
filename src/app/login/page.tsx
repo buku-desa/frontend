@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { login } from "@/lib/api";
+import { toast, Toaster } from "sonner";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   // --- State untuk Typewriter ---
   const [typedSimba, setTypedSimba] = useState("");
@@ -47,7 +47,6 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
     try {
       // Call backend API
@@ -66,15 +65,15 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error("Login error:", err);
 
-      // Handle error messages
+      // Handle error messages with toast notification
       if (err.response?.status === 401) {
-        setError("Username atau password salah");
+        toast.error("Username atau password salah");
       } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
+        toast.error(err.response.data.message);
       } else if (err.code === "ERR_NETWORK") {
-        setError("Tidak dapat terhubung ke server. Pastikan backend sudah berjalan.");
+        toast.error("Tidak dapat terhubung ke server. Pastikan backend sudah berjalan.");
       } else {
-        setError("Terjadi kesalahan saat login. Silakan coba lagi.");
+        toast.error("Terjadi kesalahan saat login. Silakan coba lagi.");
       }
 
       setIsLoading(false);
@@ -83,6 +82,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
+      <Toaster position="top-center" richColors />
       {/* BAGIAN KIRI - White Box Full Height */}
       <div className="w-full lg:w-[45%] bg-white flex items-center justify-center p-8">
         <div className="w-full max-w-md">
@@ -115,13 +115,6 @@ export default function LoginPage() {
           <p className="text-center text-gray-600 mb-8 text-lg">
             Portal Administrasi SIMBADES
           </p>
-
-          {/* Pesan Error */}
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4 text-sm" role="alert">
-              <span className="block sm:inline">{error}</span>
-            </div>
-          )}
 
           {/* Login Form */}
           <form onSubmit={handleLogin} className="space-y-5">

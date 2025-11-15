@@ -6,6 +6,7 @@ export interface ActivityLog {
   id_dokumen?: string;
   aktivitas: string;
   waktu_aktivitas: string;
+  keterangan?: string;
   user?: {
     id: string;
     name: string;

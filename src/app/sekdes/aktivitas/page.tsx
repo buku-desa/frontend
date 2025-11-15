@@ -2,8 +2,9 @@
 
 import { Button } from "@/components/shared/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getActivityLogs, type ActivityLog } from "@/lib/api";
+import SearchBarSekdes from "@/components/sekdes/SearchBarSekdes";
 
 export default function AktivitasPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,21 +15,12 @@ export default function AktivitasPage() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const perPage = 10;
 
-  // Fetch activities when page changes
+  // Fetch activities on mount only
   useEffect(() => {
     fetchActivities();
-  }, [currentPage]);
-
-  // Handle search with debounce
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setCurrentPage(1);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, []);
 
   const fetchActivities = async () => {
     try {
@@ -38,14 +30,8 @@ export default function AktivitasPage() {
       }
       setError(null);
 
-      const params: any = {};
-
-      if (searchQuery) {
-        params.search = searchQuery;
-      }
-
-      // Fetch ALL activities (no server pagination)
-      const response = await getActivityLogs(params);
+      // Fetch ALL activities (no filters, client-side filtering)
+      const response = await getActivityLogs({});
       console.log("🔍 DEBUG: Full API Response:", response);
       console.log("🔍 DEBUG: Activity Logs:", response.data.activity_logs);
       // Log each activity string
@@ -53,7 +39,6 @@ export default function AktivitasPage() {
         console.log(`🔍 [${i}] aktivitas: "${log.aktivitas}"`);
       });
       setActivities(response.data.activity_logs);
-      setTotalPages(Math.ceil(response.data.activity_logs.length / 10));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -97,6 +82,30 @@ export default function AktivitasPage() {
     }
   };
 
+  // Client-side filtering with useMemo (live search)
+  const filteredActivities = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return activities;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return activities.filter((activity) => {
+      return (
+        activity.aktivitas?.toLowerCase().includes(query) ||
+        activity.user?.name?.toLowerCase().includes(query) ||
+        activity.keterangan?.toLowerCase().includes(query)
+      );
+    });
+  }, [searchQuery, activities]);
+
+  // Update total pages when filtered activities change
+  const totalPages = Math.ceil(filteredActivities.length / perPage);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
   if (loading && activities.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -106,9 +115,9 @@ export default function AktivitasPage() {
   }
 
   // Client-side pagination
-  const startIndex = (currentPage - 1) * 10;
-  const endIndex = startIndex + 10;
-  const displayedActivities = activities.slice(startIndex, endIndex);
+  const startIndex = (currentPage - 1) * perPage;
+  const endIndex = startIndex + perPage;
+  const displayedActivities = filteredActivities.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-8">
@@ -124,29 +133,13 @@ export default function AktivitasPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Aktivitas</h3>
-            <p className="text-sm text-gray-600">Total : {activities.length}</p>
+            <p className="text-sm text-gray-600">Total : {filteredActivities.length}</p>
           </div>
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-full px-5 py-2">
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Cari aktivitas atau user"
-            className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder:text-gray-500"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && fetchActivities()}
-          />
-          <button
-            onClick={fetchActivities}
-            className="bg-green-700 hover:bg-green-800 text-white px-5 py-1.5 rounded-full font-medium text-sm transition-colors"
-          >
-            Search
-          </button>
+        <div className="flex-1">
+          <SearchBarSekdes value={searchQuery} onChange={setSearchQuery} onSearch={() => fetchActivities()} placeholder="Cari aktivitas atau user" />
         </div>
       </div>
 
@@ -200,8 +193,8 @@ export default function AktivitasPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
           <div className="text-sm text-gray-700">
-            Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, activities.length)} of{" "}
-            {activities.length} results
+            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, filteredActivities.length)} of{" "}
+            {filteredActivities.length} results
           </div>
           <div className="flex gap-2">
             <button

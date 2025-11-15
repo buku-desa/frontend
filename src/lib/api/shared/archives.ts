@@ -5,6 +5,7 @@ export interface Archive {
   id: string;
   id_dokumen: string;
   id_user: string;
+  nomor_arsip?: string;
   tanggal_arsip: string;
   keterangan?: string;
   document?: Document;

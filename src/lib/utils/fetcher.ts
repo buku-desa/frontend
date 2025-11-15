@@ -28,11 +28,15 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear auth and redirect to login
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('username');
-      window.location.href = '/';
+      // Jangan redirect kalau sedang di halaman login
+      // Biar halaman login yang handle error sendiri
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        // Unauthorized - clear auth and redirect to login
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('username');
+        window.location.href = '/';
+      }
     }
     return Promise.reject(error);
   }

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Eye, Download, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/shared/ui/button";
 import { getArchives, type Archive } from "@/lib/api";
 import { downloadDocument } from "@/lib/api";
+import SearchBarSekdes from "@/components/sekdes/SearchBarSekdes";
 
 export default function ArsipPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,7 +16,6 @@ export default function ArsipPage() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const perPage = 10;
 
   // Modals
@@ -25,19 +25,10 @@ export default function ArsipPage() {
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [selectedArchive, setSelectedArchive] = useState<Archive | null>(null);
 
-  // Fetch archives when page changes
+  // Fetch archives on mount only
   useEffect(() => {
     fetchArchives();
-  }, [currentPage]);
-
-  // Handle search with debounce
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setCurrentPage(1);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, []);
 
   const fetchArchives = async () => {
     try {
@@ -47,21 +38,14 @@ export default function ArsipPage() {
       }
       setError(null);
 
-      const params: any = {};
-
-      if (searchQuery) {
-        params.search = searchQuery;
-      }
-
-      // Fetch ALL archives (no server pagination)
-      const response = await getArchives(params);
+      // Fetch ALL archives (no filters, client-side filtering)
+      const response = await getArchives({});
       console.log("Archives full response:", response);
       console.log("Archives meta:", response.meta);
       console.log("Archives total:", response.meta?.total, typeof response.meta?.total);
 
       // Set all archives
       setArchives(response.data);
-      setTotalPages(Math.ceil(response.data.length / perPage));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -140,6 +124,31 @@ export default function ArsipPage() {
     });
   };
 
+  // Client-side filtering with useMemo (live search)
+  const filteredArchives = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return archives;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return archives.filter((archive) => {
+      return (
+        archive.nomor_arsip?.toLowerCase().includes(query) ||
+        archive.document?.tentang?.toLowerCase().includes(query) ||
+        archive.document?.jenis_dokumen?.toLowerCase().includes(query) ||
+        archive.keterangan?.toLowerCase().includes(query)
+      );
+    });
+  }, [searchQuery, archives]);
+
+  // Update total pages when filtered archives change
+  const totalPages = Math.ceil(filteredArchives.length / perPage);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
   if (loading && archives.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -151,7 +160,7 @@ export default function ArsipPage() {
   // Client-side pagination
   const startIndex = (currentPage - 1) * perPage;
   const endIndex = startIndex + perPage;
-  const displayedArchives = archives.slice(startIndex, endIndex);
+  const displayedArchives = filteredArchives.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-8">
@@ -165,29 +174,13 @@ export default function ArsipPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Arsip</h3>
-            <p className="text-sm text-gray-600">Total : {archives.length}</p>
+            <p className="text-sm text-gray-600">Total : {filteredArchives.length}</p>
           </div>
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-full px-5 py-2">
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Cari judul, nomor, atau jenis dokumen"
-            className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder:text-gray-500"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && fetchArchives()}
-          />
-          <button
-            onClick={fetchArchives}
-            className="bg-green-700 hover:bg-green-800 text-white px-5 py-1.5 rounded-full font-medium text-sm transition-colors"
-          >
-            Search
-          </button>
+        <div className="flex-1">
+          <SearchBarSekdes value={searchQuery} onChange={setSearchQuery} />
         </div>
       </div>
 
@@ -262,8 +255,8 @@ export default function ArsipPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
           <div className="text-sm text-gray-700">
-            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, archives.length)} of{" "}
-            {archives.length} results
+            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, filteredArchives.length)} of{" "}
+            {filteredArchives.length} results
           </div>
           <div className="flex gap-2">
             <button

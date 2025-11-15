@@ -3,7 +3,7 @@
 import { Button } from "@/components/shared/ui/button";
 import { Eye, Download, Edit3, Archive, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { FileText } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   getDocuments,
   downloadDocument,
@@ -11,6 +11,7 @@ import {
   type Document as APIDocument,
 } from "@/lib/api";
 import { createArchive } from "@/lib/api";
+import SearchBarSekdes from "@/components/sekdes/SearchBarSekdes";
 
 export default function DokumenPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,7 +22,6 @@ export default function DokumenPage() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const perPage = 10;
 
   // Filter
@@ -54,19 +54,10 @@ export default function DokumenPage() {
     file_upload: undefined,
   });
 
-  // Fetch documents when page or filters change
+  // Fetch documents on mount only
   useEffect(() => {
     fetchDocuments();
-  }, [currentPage, statusFilter, jenisFilter]);
-
-  // Handle search with debounce
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setCurrentPage(1);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, []);
 
   const fetchDocuments = async () => {
     try {
@@ -76,29 +67,14 @@ export default function DokumenPage() {
       }
       setError(null);
 
-      const params: any = {};
-
-      if (statusFilter !== "all") {
-        params.status = statusFilter;
-      }
-
-      if (jenisFilter !== "all") {
-        params.jenis_dokumen = jenisFilter;
-      }
-
-      if (searchQuery) {
-        params.search = searchQuery;
-      }
-
-      // Fetch ALL documents (no server pagination)
-      const response = await getDocuments(params);
+      // Fetch ALL documents (no filters, client-side filtering)
+      const response = await getDocuments({});
       console.log("Documents full response:", response);
       console.log("Documents meta:", response.meta);
       console.log("Documents total:", response.meta?.total, typeof response.meta?.total);
 
       // Set all documents
       setDocuments(response.data);
-      setTotalPages(Math.ceil(response.data.length / perPage));
 
       // Mark initial load as complete
       if (isInitialLoad) {
@@ -239,6 +215,43 @@ export default function DokumenPage() {
     return styles[status as keyof typeof styles] || "bg-gray-100 text-gray-800";
   };
 
+  // Client-side filtering with useMemo (live search)
+  const filteredDocuments = useMemo(() => {
+    let filtered = documents;
+
+    // Apply status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(doc => doc.status === statusFilter);
+    }
+
+    // Apply jenis filter
+    if (jenisFilter !== "all") {
+      filtered = filtered.filter(doc => doc.jenis_dokumen === jenisFilter);
+    }
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((doc) => {
+        return (
+          doc.tentang?.toLowerCase().includes(query) ||
+          doc.nomor_ditetapkan?.toLowerCase().includes(query) ||
+          doc.jenis_dokumen?.toLowerCase().includes(query)
+        );
+      });
+    }
+
+    return filtered;
+  }, [documents, searchQuery, statusFilter, jenisFilter]);
+
+  // Update total pages when filtered documents change
+  const totalPages = Math.ceil(filteredDocuments.length / perPage);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, jenisFilter]);
+
   if (loading && documents.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -250,7 +263,7 @@ export default function DokumenPage() {
   // Client-side pagination
   const startIndex = (currentPage - 1) * perPage;
   const endIndex = startIndex + perPage;
-  const displayedDocuments = documents.slice(startIndex, endIndex);
+  const displayedDocuments = filteredDocuments.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-8">
@@ -263,29 +276,13 @@ export default function DokumenPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">Dokumen</h3>
-            <p className="text-sm text-gray-600">Total : {documents.length}</p>
+            <p className="text-sm text-gray-600">Total : {filteredDocuments.length}</p>
           </div>
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-full px-5 py-2">
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Cari judul, nomor, atau jenis dokumen"
-            className="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder:text-gray-500"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && fetchDocuments()}
-          />
-          <button
-            onClick={fetchDocuments}
-            className="bg-green-700 hover:bg-green-800 text-white px-5 py-1.5 rounded-full font-medium text-sm transition-colors"
-          >
-            Search
-          </button>
+        <div className="flex-1">
+          <SearchBarSekdes value={searchQuery} onChange={setSearchQuery} />
         </div>
       </div>
 
@@ -420,8 +417,8 @@ export default function DokumenPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg">
           <div className="text-sm text-gray-700">
-            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, documents.length)} of{" "}
-            {documents.length} results
+            Showing {(currentPage - 1) * perPage + 1} to {Math.min(currentPage * perPage, filteredDocuments.length)} of{" "}
+            {filteredDocuments.length} results
           </div>
           <div className="flex gap-2">
             <button
