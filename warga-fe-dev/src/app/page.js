@@ -1,87 +1,114 @@
+"use client";
 import Image from "next/image";
+import { useMemo, useState } from "react";
 
 export default function Home() {
-  const beritaData = [
+  const beritaData = useMemo(() => [
     {
       id: 1,
-      title: "Blaalalalalalala yayaaa",
-      date: "14 September 2025",
+      title: "Ujian Seleksi Pamong Kalurahan Caturtunggal Resmi Dibuka",
+      date: "1 September 2025",
+      tanggal_ditetapkan: "2025-09-01",
+      file: "/Ujian Seleksi Pamong Kalurahan Caturtunggal Resmi Dibuka.pdf",
     },
     {
       id: 2,
-      title: "Blaalalalalalala yayaaa",
-      date: "14 September 2025",
+      title:
+        "Pembudidaya Ikan Minadadi Terima Bantuan Bibit dan Perlengkapan dari Kalurahan Caturtunggal",
+      date: "24 September 2025",
+      tanggal_ditetapkan: "2025-09-24",
+      file:
+        "/Pembudidaya Ikan Minadadi Terima Bantuan Bibit dan Perlengkapan dari Kalurahan Caturtunggal.pdf",
     },
     {
       id: 3,
-      title: "Blaalalalalalala yayaaa",
-      date: "14 September 2025",
+      title: "Caturtunggal Hadirkan Dukcapil dan Pengadilan Negeri Sleman",
+      date: "1 Oktober 2025",
+      tanggal_ditetapkan: "2025-10-01",
+      file: "/Caturtunggal Hadirkan Dukcapil dan Pengadilan Negeri Sleman.pdf",
     },
     {
       id: 4,
-      title: "Blaalalalalalala yayaaa",
-      date: "14 September 2025",
+      title: "PERATURAN KALURAHAN CATURTUNGGAL  APBKAL23",
+      date: "2023",
+      tanggal_ditetapkan: "2023-01-01",
+      file: "/PERATURAN KALURAHAN CATURTUNGGAL  APBKAL23.pdf",
     },
-  ];
+  ], []);
 
-  const bukuData = [
+  const bukuData = useMemo(() => [
     {
       no: 1,
-      judul: "Perdes Yogya Nomor 6 tentang RKP Desa tahun 2022",
+      judul: "PERATURAN KALURAHAN TENTANG RKP DESA Sendangsari 2021 NO.6",
       jenis: "Peraturan",
-      tahun: 2022,
+      tahun: "2021",
+      tanggal_ditetapkan: "2021-01-01",
+      file: "/PERATURAN KALURAHAN TENTANG RKP DESA Sendangsari 2021 NO.6.pdf",
     },
     {
       no: 2,
-      judul: "Peraturan Desa Yogya Nomor 01 tahun 2022 Tentang Laporan Pertanggungjawaban",
+      judul: "PERKAL NO1 TAHUN 2022 LAPORAN PERTANGGUNGJAWABAN",
       jenis: "Peraturan",
-      tahun: 2023,
+      tahun: "2022",
+      tanggal_ditetapkan: "2022-01-01",
+      file: "/PERKAL NO1 TAHUN 2022 LAPORAN PERTANGGUNGJAWABAN.pdf",
     },
     {
       no: 3,
-      judul: "Perdes Yogya Nomor 6 tentang RKP Desa tahun 2022",
+      judul: "PERATURAN KALURAHAN CATURTUNGGAL  APBKAL23",
       jenis: "Peraturan",
-      tahun: 2024,
+      tahun: "2022",
+      tanggal_ditetapkan: "2022-06-01",
+      file: "/PERATURAN KALURAHAN CATURTUNGGAL  APBKAL23.pdf",
     },
     {
       no: 4,
-      judul: "Perdes Yogya Nomor 6 tentang RKP Desa tahun 2022",
+      judul: "Pembudidaya Ikan Minadadi Terima Bantuan Bibit dan Perlengkapan dari Kalurahan Caturtunggal",
       jenis: "",
       tahun: "",
+      tanggal_ditetapkan: "2025-09-24",
+      file: "/Pembudidaya Ikan Minadadi Terima Bantuan Bibit dan Perlengkapan dari Kalurahan Caturtunggal.pdf",
     },
     {
       no: 5,
-      judul: "Perdes Yogya Nomor 6 tentang RKP Desa tahun 2022",
+      judul: "Sosialisasi Perda DIY Nomor 3 Tahun 2020",
       jenis: "",
       tahun: "",
+      tanggal_ditetapkan: "2020-01-01",
+      file: "/Sosialisasi Perda DIY Nomor 3 Tahun 2020_ DPRD DIY Tekankan Pembangunan Wilayah Perbatasan.pdf",
     },
-  ];
+  ], []);
+
+  // Filters & sorting (public view: newest first)
+  const [beritaQuery, setBeritaQuery] = useState("");
+  const [bukuQuery, setBukuQuery] = useState("");
+
+  const filteredSortedBerita = useMemo(() => {
+    return [...beritaData]
+      .filter((b) =>
+        beritaQuery
+          ? `${b.title} ${b.date}`.toLowerCase().includes(beritaQuery.toLowerCase())
+          : true
+      )
+      .sort((a, b) => new Date(b.tanggal_ditetapkan) - new Date(a.tanggal_ditetapkan));
+  }, [beritaData, beritaQuery]);
+
+  const filteredSortedBuku = useMemo(() => {
+    return [...bukuData]
+      .filter((d) =>
+        bukuQuery
+          ? `${d.judul} ${d.jenis} ${d.tahun}`.toLowerCase().includes(bukuQuery.toLowerCase())
+          : true
+      )
+      .sort((a, b) => new Date(b.tanggal_ditetapkan) - new Date(a.tanggal_ditetapkan));
+  }, [bukuData, bukuQuery]);
 
   return (
     <div className="min-h-screen bg-gray-50 text-black">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button className="p-2">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-gray-700 hover:text-gray-900">Beranda</a>
-            <a href="#" className="text-gray-700 hover:text-gray-900">Buku Lembaran Desa</a>
-            <a href="#" className="text-gray-700 hover:text-gray-900">Berita Desa</a>
-          </nav>
-          <button className="bg-green-700 text-white px-6 py-2 rounded-full hover:bg-green-800">
-            Log in Admin
-          </button>
-        </div>
-      </header>
+      {/* Header is provided by RootLayout */}
 
       {/* Hero Section */}
-      <section className="relative h-80 bg-cover bg-center" style={{ backgroundImage: "url('/background.png')" }}>
+      <section className="relative h-80 bg-cover bg-center" style={{ backgroundImage: "url('/jogja.png')" }}>
         <div className="absolute inset-0 bg-black/30"></div>
         <div className="relative container mx-auto px-4 h-full flex flex-col items-center md:items-start justify-center text-center md:text-left">
           <h1 className="text-white text-6xl font-bold mb-8" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
@@ -106,65 +133,63 @@ export default function Home() {
       </section>
 
       {/* Berita Desa Section */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="flex justify-between items-center mb-6">
+      <section className="container mx-auto max-w-7xl px-4 py-12" id="berita">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Berita Desa</h2>
-          <a href="#" className="text-black-000 hover:text-gray-800 flex items-center gap-2">
-            Lihat Semua
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </a>
+          <input
+            value={beritaQuery}
+            onChange={(e) => setBeritaQuery(e.target.value)}
+            placeholder="Cari berita..."
+            className="h-9 w-56 rounded-md border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-green-700"
+          />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {beritaData.map((berita) => (
-            <div key={berita.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div>
-                <div className="text-center">
-                  <div className="w-auto h-auto mx-auto mb-2 overflow-hidden rounded-xl ">
-                    <Image
-                      src="/avatar.png"
-                      alt="avatar"
-                      width={80}
-                      height={80}
-                      className="object-cover w-full h-full"
-                    />
+        <div className="overflow-x-auto">
+          <div className="flex gap-6 snap-x snap-mandatory scroll-smooth pr-4" aria-label="Berita scroll container">
+            {filteredSortedBerita.map((berita) => (
+              <a
+                key={berita.id}
+                href={berita.file ? encodeURI(berita.file) : '#'}
+                target={berita.file ? "_blank" : undefined}
+                rel={berita.file ? "noopener noreferrer" : undefined}
+                className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow flex-none min-w-[360px] sm:min-w-[420px] snap-start block"
+              >
+                <div className="relative h-56 w-full overflow-hidden rounded-t-2xl bg-green-700">
+                  <Image
+                    src="/document.png"
+                    alt="document"
+                    fill
+                    sizes="(max-width: 768px) 320px, 420px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="font-semibold text-black text-xl leading-snug mb-3">
+                    {berita.title}
+                  </h3>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {berita.date}
                   </div>
                 </div>
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-black mb-2">{berita.title}</h3>
-                <div className="flex items-center gap-2 text-sm text-black">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  {berita.date}
-                </div>
-              </div>
-            </div>
-          ))}
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Buku Lembaran Desa Section */}
-      <section className="container mx-auto px-4 py-12">
+      <section className="container mx-auto max-w-7xl px-4 py-12" id="buku">
         <div className="mb-6">
-          <h2 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-tight">
-            Buku Lembaran Desa
-          </h2>
-          <div className="flex items-center gap-3 mt-4">
-            <span className="text-base">Tampilkan</span>
-            <div className="relative">
-              <select className="appearance-none border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white">
-                <option>5</option>
-                <option>10</option>
-                <option>25</option>
-              </select>
-              <svg className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-            <span className="text-base">Entri</span>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-3xl font-bold text-gray-900">Buku Lembaran Desa</h2>
+            <input
+              value={bukuQuery}
+              onChange={(e) => setBukuQuery(e.target.value)}
+              placeholder="Cari dokumen..."
+              className="h-9 w-64 rounded-md border border-gray-300 px-3 text-sm outline-none focus:ring-2 focus:ring-green-700"
+            />
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -179,25 +204,66 @@ export default function Home() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {bukuData.map((item) => (
+              {filteredSortedBuku.map((item) => (
                 <tr key={item.no} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm">{item.no}</td>
-                  <td className="px-6 py-4 text-sm">{item.judul}</td>
+                  <td className="px-6 py-4 text-sm">
+                    {item.file ? (
+                      <a
+                        href={encodeURI(item.file)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-black-900 hover:underline"
+                      >
+                        {item.judul}
+                      </a>
+                    ) : (
+                      item.judul
+                    )}
+                  </td>
                   <td className="px-6 py-4 text-sm">{item.jenis}</td>
                   <td className="px-6 py-4 text-sm">{item.tahun}</td>
                   <td className="px-6 py-4 text-sm">
-                    <div className="flex gap-2">
-                      <button className="bg-red-600 text-white p-2 rounded hover:bg-red-700">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-                      <button className="bg-green-700 text-white p-2 rounded hover:bg-green-800">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </button>
+                    <div className="flex gap-3">
+                      {item.file ? (
+                        <a
+                          href={encodeURI(item.file)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-red-600 text-white hover:bg-red-700"
+                          aria-label="Lihat dokumen"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </a>
+                      ) : (
+                        <button className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-red-600 text-white opacity-50 cursor-not-allowed" disabled aria-disabled="true">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
+                      )}
+                      {item.file ? (
+                        <a
+                          href={encodeURI(item.file)}
+                          download
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-green-700 text-white hover:bg-green-800"
+                          aria-label="Unduh dokumen"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        </a>
+                      ) : (
+                        <button className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-green-700 text-white opacity-50 cursor-not-allowed" disabled aria-disabled="true">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
