@@ -37,7 +37,7 @@ export default function DashboardPage() {
   const fetchDocuments = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("authToken")
       const res = await fetch(`${API_BASE_URL}/documents`, {
         headers: {
           Authorization: token ? `Bearer ${token}` : "",
