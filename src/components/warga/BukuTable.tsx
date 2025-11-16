@@ -16,6 +16,10 @@ export default function BukuTable({ data, searchQuery }: BukuTableProps) {
   const [error, setError] = useState<string | null>(null)
   const [selectedPDF, setSelectedPDF] = useState<{ url: string; title: string } | null>(null)
 
+  // Sorting states baru
+  const [sortField, setSortField] = useState<'tanggal_ditetapkan' | 'tanggal_diundangkan' | null>(null)
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null)
+
   const fetchDocuments = async (query?: string) => {
     setLoading(true)
     setError(null)
@@ -38,9 +42,7 @@ export default function BukuTable({ data, searchQuery }: BukuTableProps) {
   }
 
   useEffect(() => {
-    // Jika ada data hasil pencarian dari SearchBar, gunakan itu
     if (data !== undefined) {
-      // Filter hanya untuk peraturan desa
       const filtered = data.filter(
         (doc) => doc.jenis_dokumen === 'peraturan_desa' && doc.status === 'Disetujui'
       )
@@ -48,7 +50,6 @@ export default function BukuTable({ data, searchQuery }: BukuTableProps) {
       setLoading(false)
       setError(null)
     } else {
-      // Jika tidak ada data, fetch berdasarkan searchQuery atau load semua
       fetchDocuments(searchQuery)
     }
   }, [data, searchQuery])
@@ -80,6 +81,20 @@ export default function BukuTable({ data, searchQuery }: BukuTableProps) {
     document.body.removeChild(link)
   }
 
+  // Sorting logic
+  const handleSort = (field: 'tanggal_ditetapkan' | 'tanggal_diundangkan') => {
+    if (sortField === field) {
+      setSortOrder(prev => {
+        if (prev === null) return 'desc'
+        if (prev === 'desc') return 'asc'
+        return null
+      })
+    } else {
+      setSortField(field)
+      setSortOrder('desc')
+    }
+  }
+
   if (loading) return <p className="text-gray-500">Memuat data...</p>
   if (error) return <p className="text-red-500">{error}</p>
 
@@ -91,53 +106,85 @@ export default function BukuTable({ data, searchQuery }: BukuTableProps) {
             <thead className="bg-green-800 text-white">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-semibold">NO</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold">NOMOR & TANGGAL DITETAPKAN</th>
+
+                {/* SORT: Tanggal Ditetapkan */}
+                <th
+                  className="px-6 py-4 text-left text-sm font-semibold cursor-pointer select-none"
+                  onClick={() => handleSort('tanggal_ditetapkan')}
+                >
+                  NOMOR & TANGGAL DITETAPKAN
+                  {sortField === 'tanggal_ditetapkan' && sortOrder === 'desc' && ' ↓'}
+                  {sortField === 'tanggal_ditetapkan' && sortOrder === 'asc' && ' ↑'}
+                </th>
+
                 <th className="px-6 py-4 text-left text-sm font-semibold">JENIS</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold">TENTANG</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold">NOMOR & TANGGAL DIUNDANGKAN</th>
+
+                {/* 🔥 SORT: Tanggal Diundangkan */}
+                <th
+                  className="px-6 py-4 text-left text-sm font-semibold cursor-pointer select-none"
+                  onClick={() => handleSort('tanggal_diundangkan')}
+                >
+                  NOMOR & TANGGAL DIUNDANGKAN
+                  {sortField === 'tanggal_diundangkan' && sortOrder === 'desc' && ' ↓'}
+                  {sortField === 'tanggal_diundangkan' && sortOrder === 'asc' && ' ↑'}
+                </th>
+
                 <th className="px-6 py-4 text-center text-sm font-semibold">AKSI</th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-gray-200">
-              {documents.map((doc, index) => {
-                const nomorTanggal =
-                  doc.nomor_ditetapkan || doc.tanggal_ditetapkan
-                    ? `${doc.nomor_ditetapkan || '-'} / ${formatDate(doc.tanggal_ditetapkan)}`
-                    : '-'
+              {[...documents]
+                .sort((a, b) => {
+                  if (!sortField || !sortOrder) return 0
 
-                const nomorTanggal2 =
-                  doc.nomor_diundangkan && doc.tanggal_diundangkan
-                    ? `${doc.nomor_diundangkan} / ${formatDate(doc.tanggal_diundangkan)}`
-                    : '-'
+                  const tA = new Date(a[sortField]).getTime()
+                  const tB = new Date(b[sortField]).getTime()
 
-                return (
-                  <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-gray-700">{index + 1}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">{nomorTanggal}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{formatJenis(doc.jenis_dokumen)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{doc.tentang || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{nomorTanggal2}</td>
-                    <td className="px-6 py-4 text-sm">
-                      <div className="flex gap-2 justify-center">
-                        <button
-                          onClick={() => handleView(doc)}
-                          className="bg-green-100 p-2 rounded-lg hover:bg-green-200 flex items-center gap-1"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span className="text-xs hidden sm:inline">Lihat</span>
-                        </button>
-                        <button
-                          onClick={() => handleDownload(doc)}
-                          className="bg-green-700 text-white p-2 rounded-lg hover:bg-green-800 flex items-center gap-1"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span className="text-xs hidden sm:inline">Unduh</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
+                  return sortOrder === 'desc' ? tB - tA : tA - tB
+                })
+                .map((doc, index) => {
+                  const nomorTanggal =
+                    doc.nomor_ditetapkan || doc.tanggal_ditetapkan
+                      ? `${doc.nomor_ditetapkan || '-'} / ${formatDate(doc.tanggal_ditetapkan)}`
+                      : '-'
+
+                  const nomorTanggal2 =
+                    doc.nomor_diundangkan && doc.tanggal_diundangkan
+                      ? `${doc.nomor_diundangkan} / ${formatDate(doc.tanggal_diundangkan)}`
+                      : '-'
+
+                  return (
+                    <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 text-sm text-gray-700">{index + 1}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 font-medium">{nomorTanggal}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{formatJenis(doc.jenis_dokumen)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{doc.tentang || '-'}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{nomorTanggal2}</td>
+
+                      <td className="px-6 py-4 text-sm">
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            onClick={() => handleView(doc)}
+                            className="bg-green-100 p-2 rounded-lg hover:bg-green-200 flex items-center gap-1"
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span className="text-xs hidden sm:inline">Lihat</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDownload(doc)}
+                            className="bg-green-700 text-white p-2 rounded-lg hover:bg-green-800 flex items-center gap-1"
+                          >
+                            <Download className="w-4 h-4" />
+                            <span className="text-xs hidden sm:inline">Unduh</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
             </tbody>
           </table>
         </div>
@@ -145,8 +192,8 @@ export default function BukuTable({ data, searchQuery }: BukuTableProps) {
         {documents.length === 0 && !loading && (
           <div className="text-center py-12 text-gray-500">
             <p className="text-lg">
-              {searchQuery 
-                ? 'Tidak ada dokumen yang sesuai dengan pencarian' 
+              {searchQuery
+                ? 'Tidak ada dokumen yang sesuai dengan pencarian'
                 : 'Tidak ada dokumen ditemukan'}
             </p>
           </div>

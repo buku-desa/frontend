@@ -215,34 +215,59 @@ export default function DokumenPage() {
     return styles[status as keyof typeof styles] || "bg-gray-100 text-gray-800";
   };
 
-  // Client-side filtering with useMemo (live search)
-  const filteredDocuments = useMemo(() => {
-    let filtered = documents;
+  const matchesSearch = (doc: APIDocument, query: string): boolean => {
+  if (!query) return true;
+  
+  const q = query.toLowerCase();
+  
+  // Konversi semua field ke string
+  const tentang = doc.tentang?.toString().toLowerCase() || '';
+  const nomorDitetapkan = doc.nomor_ditetapkan?.toString().toLowerCase() || '';
+  const nomorDiundangkan = doc.nomor_diundangkan?.toString().toLowerCase() || '';
+  const jenisDokumen = doc.jenis_dokumen?.toString().toLowerCase() || '';
+  
+  // Konversi jenis dokumen ke format display yang user-friendly
+  const jenisDisplay = jenisDokumen
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+    .toLowerCase();
+  
+  // Normalisasi query: hapus underscore dan extra spaces
+  const normalizedQuery = q.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+  
+  return (
+    tentang.includes(q) ||
+    nomorDitetapkan.includes(q) ||
+    nomorDiundangkan.includes(q) ||
+    jenisDokumen.includes(q) ||
+    jenisDokumen.replace(/_/g, ' ').includes(normalizedQuery) ||
+    jenisDisplay.includes(normalizedQuery)
+  );
+};
 
-    // Apply status filter
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(doc => doc.status === statusFilter);
-    }
+// GANTI useMemo filteredDocuments yang lama (sekitar baris 194-215) dengan ini:
 
-    // Apply jenis filter
-    if (jenisFilter !== "all") {
-      filtered = filtered.filter(doc => doc.jenis_dokumen === jenisFilter);
-    }
+const filteredDocuments = useMemo(() => {
+  let filtered = documents;
 
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((doc) => {
-        return (
-          doc.tentang?.toLowerCase().includes(query) ||
-          doc.nomor_ditetapkan?.toLowerCase().includes(query) ||
-          doc.jenis_dokumen?.toLowerCase().includes(query)
-        );
-      });
-    }
+  // Apply status filter
+  if (statusFilter !== "all") {
+    filtered = filtered.filter(doc => doc.status === statusFilter);
+  }
 
-    return filtered;
-  }, [documents, searchQuery, statusFilter, jenisFilter]);
+  // Apply jenis filter
+  if (jenisFilter !== "all") {
+    filtered = filtered.filter(doc => doc.jenis_dokumen === jenisFilter);
+  }
+
+  // Apply search filter dengan matchesSearch yang lebih pintar
+  if (searchQuery.trim()) {
+    filtered = filtered.filter((doc) => matchesSearch(doc, searchQuery));
+  }
+
+  return filtered;
+}, [documents, searchQuery, statusFilter, jenisFilter]);
 
   // Update total pages when filtered documents change
   const totalPages = Math.ceil(filteredDocuments.length / perPage);

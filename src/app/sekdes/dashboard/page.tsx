@@ -64,118 +64,127 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      // Only show loading screen on initial page load
-      if (isInitialLoad) {
-        setLoading(true);
-      }
-      setError(null);
-
-      console.log("Fetching data from API...");
-
-      // Fetch all documents for total count (all statuses)
-      const allDocsResponse = await getDocuments({});
-      setAllDocuments(allDocsResponse.data);
-
-      // Fetch all documents (approved) for display - will be filtered by useMemo
-      const approvedDocs = allDocsResponse.data.filter((d: APIDocument) => d.status === "Disetujui");
-      setDocuments(approvedDocs);
-
-      // Fetch documents pending verification (Draft status)
-      const verifyResponse = await getDocuments({ status: "Draft" });
-      console.log("Verification docs response:", verifyResponse);
-      setVerificationDocuments(verifyResponse.data);
-
-      // Fetch recent activity logs
-      const logsResponse = await getActivityLogs({});
-      console.log("Activity logs response:", logsResponse);
-      setActivities(logsResponse.data.activity_logs);
-
-      // Fetch all archives for total count
-      const archivesResponse = await getArchives({});
-      console.log("Archives response:", archivesResponse);
-      console.log("Archives total type:", typeof archivesResponse.meta.total, archivesResponse.meta.total);
-      setAllArchives(archivesResponse.data);
-
-      // Fetch all activities for total count
-      const allLogsResponse = await getActivityLogs({});
-      setAllActivities(allLogsResponse.data.activity_logs);
-      console.log("✅ Data fetching complete");
-
-      // Mark initial load as complete
-      if (isInitialLoad) {
-        setIsInitialLoad(false);
-      }
-    } catch (err: any) {
-      console.error("Error fetching data:", err);
-      console.error("Error details:", {
-        message: err.message,
-        response: err.response,
-        status: err.response?.status,
-      });
-
-      let errorMessage = "Gagal memuat data dari server";
-
-      if (err.code === "ERR_NETWORK") {
-        errorMessage = "Tidak dapat terhubung ke server. Pastikan backend Laravel sudah berjalan di http://localhost:8000";
-      } else if (err.response?.status === 401) {
-        errorMessage = "Sesi login Anda telah berakhir. Silakan login kembali.";
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      }
-
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+  const fetchData = async (search?: string) => {
+  try {
+    if (isInitialLoad) {
+      setLoading(true);
     }
-  };
+    setError(null);
 
-  // Client-side filtering dengan useMemo (live search)
-  const filteredDocuments = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return documents.slice(0, 3); // Show only first 3
+    console.log("Fetching data from API...");
+
+    // Fetch SEMUA dokumen tanpa filter
+    const allDocsResponse = await getDocuments({});
+    setAllDocuments(allDocsResponse.data);
+
+    // Set documents langsung tanpa filter - biar useMemo yang handle
+    const approvedDocs = allDocsResponse.data.filter((d: APIDocument) => d.status === "Disetujui");
+    setDocuments(approvedDocs); // Tidak di-slice di sini, biar useMemo yang slice
+
+    // Fetch dokumen draft untuk verifikasi
+    const verifyResponse = await getDocuments({ status: "Draft", per_page: 100 });
+    setVerificationDocuments(verifyResponse.data); // Tidak di-slice di sini
+
+    // Fetch activity logs
+    const logsResponse = await getActivityLogs({});
+    setActivities(logsResponse.data.activity_logs); // Tidak di-slice di sini
+    setAllActivities(logsResponse.data.activity_logs);
+
+    // Fetch archives
+    const archivesResponse = await getArchives({});
+    setAllArchives(archivesResponse.data);
+
+    console.log("✅ Data fetching complete");
+
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+    }
+  } catch (err: any) {
+    console.error("Error fetching data:", err);
+    console.error("Error details:", {
+      message: err.message,
+      response: err.response,
+      status: err.response?.status,
+    });
+
+    let errorMessage = "Gagal memuat data dari server";
+
+    if (err.code === "ERR_NETWORK") {
+      errorMessage = "Tidak dapat terhubung ke server. Pastikan backend Laravel sudah berjalan di http://localhost:8000";
+    } else if (err.response?.status === 401) {
+      errorMessage = "Sesi login Anda telah berakhir. Silakan login kembali.";
+    } else if (err.response?.data?.message) {
+      errorMessage = err.response.data.message;
     }
 
-    const query = searchQuery.toLowerCase();
-    return documents.filter((doc) => {
-      return (
-        doc.tentang?.toLowerCase().includes(query) ||
-        doc.nomor_ditetapkan?.toLowerCase().includes(query) ||
-        doc.jenis_dokumen?.toLowerCase().includes(query)
-      );
-    }).slice(0, 3);
-  }, [searchQuery, documents]);
+    setError(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const filteredVerificationDocuments = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return verificationDocuments.slice(0, 4); // Show only first 4
-    }
+  const matchesSearch = (doc: APIDocument, query: string): boolean => {
+  if (!query) return true;
+  
+  const q = query.toLowerCase();
+  
+  // Konversi semua field ke string
+  const tentang = doc.tentang?.toString().toLowerCase() || '';
+  const nomorDitetapkan = doc.nomor_ditetapkan?.toString().toLowerCase() || '';
+  const nomorDiundangkan = doc.nomor_diundangkan?.toString().toLowerCase() || '';
+  const jenisDokumen = doc.jenis_dokumen?.toString().toLowerCase() || '';
+  
+  // Konversi jenis dokumen ke format display
+  const jenisDisplay = jenisDokumen
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+    .toLowerCase();
+  
+  // Normalisasi query: hapus underscore dan extra spaces
+  const normalizedQuery = q.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+  
+  return (
+    tentang.includes(q) ||
+    nomorDitetapkan.includes(q) ||
+    nomorDiundangkan.includes(q) ||
+    jenisDokumen.includes(q) ||
+    jenisDokumen.replace(/_/g, ' ').includes(normalizedQuery) ||
+    jenisDisplay.includes(normalizedQuery)
+  );
+};
 
-    const query = searchQuery.toLowerCase();
-    return verificationDocuments.filter((doc) => {
-      return (
-        doc.tentang?.toLowerCase().includes(query) ||
-        doc.nomor_ditetapkan?.toLowerCase().includes(query) ||
-        doc.jenis_dokumen?.toLowerCase().includes(query)
-      );
-    }).slice(0, 4);
-  }, [searchQuery, verificationDocuments]);
+// 2. HAPUS atau COMMENT useMemo yang lama, GANTI dengan ini:
+const filteredDocuments = useMemo(() => {
+  if (!searchQuery.trim()) {
+    return documents.slice(0, 3); // Show only first 3
+  }
 
-  const filteredActivities = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return activities.slice(0, 3); // Show only first 3
-    }
+  return documents.filter((doc) => matchesSearch(doc, searchQuery)).slice(0, 3);
+}, [searchQuery, documents]);
 
-    const query = searchQuery.toLowerCase();
-    return activities.filter((act) => {
-      return (
-        act.aktivitas?.toLowerCase().includes(query) ||
-        act.user?.name?.toLowerCase().includes(query) ||
-        act.keterangan?.toLowerCase().includes(query)
-      );
-    }).slice(0, 3);
-  }, [searchQuery, activities]);
+const filteredVerificationDocuments = useMemo(() => {
+  if (!searchQuery.trim()) {
+    return verificationDocuments.slice(0, 4); // Show only first 4
+  }
+
+  return verificationDocuments.filter((doc) => matchesSearch(doc, searchQuery)).slice(0, 4);
+}, [searchQuery, verificationDocuments]);
+
+const filteredActivities = useMemo(() => {
+  if (!searchQuery.trim()) {
+    return activities.slice(0, 3); // Show only first 3
+  }
+
+  const query = searchQuery.toLowerCase();
+  return activities.filter((act) => {
+    return (
+      act.aktivitas?.toLowerCase().includes(query) ||
+      act.user?.name?.toLowerCase().includes(query) ||
+      act.keterangan?.toLowerCase().includes(query)
+    );
+  }).slice(0, 3);
+}, [searchQuery, activities]);
 
   // Handler functions
   const handleView = async (doc: APIDocument) => {

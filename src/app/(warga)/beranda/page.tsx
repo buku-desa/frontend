@@ -4,9 +4,18 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Hero from '@/../public/hero.png'
 import SearchBar from '@/components/warga/SearchBar'
-import BukuTable from '@/components/warga/BukuTable'
-import BeritaCardHorizontal from '@/components/warga/BeritaCardHorizontal'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+const BukuTable = dynamic(() => import('@/components/warga/BukuTable'), {
+  ssr: false,
+  loading: () => <div className="h-16 bg-white border-b" />
+})
+
+const BeritaCardHorizontal = dynamic(() => import('@/components/warga/BeritaCardHorizontal'), {
+  ssr: false,
+  loading: () => <div className="h-16 bg-white border-b" />
+})
+
 import { type Document } from '@/lib/api/shared/documents'
 
 export default function BerandaPage() {

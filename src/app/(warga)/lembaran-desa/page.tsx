@@ -2,69 +2,149 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Head from 'next/head'
-import Header from '@/components/warga/Header'
-import BukuCard from '@/components/warga/BukuCard'
-import bukuData from '@/../data/bukuData'
+import dynamic from 'next/dynamic'
+import { getDocuments, type Document } from '@/lib/api/shared/documents'
+import { Loader2, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react'
 
-const indoMonths: Record<string, number> = {
-  januari: 0,
-  februari: 1,
-  maret: 2,
-  april: 3,
-  mei: 4,
-  juni: 5,
-  juli: 6,
-  agustus: 7,
-  september: 8,
-  oktober: 9,
-  november: 10,
-  desember: 11,
-}
+// Dynamic import untuk avoid SSR issues
+const Header = dynamic(() => import('@/components/warga/Header'), {
+  ssr: false,
+  loading: () => <div className="h-16 bg-white border-b" />
+})
 
-function parseIndoDate(d: string): number {
-  const parts = d.trim().split(/\s+/)
-  if (parts.length < 3) return 0
-  const [ddStr, monthStr, yyStr] = [parts[0], parts[1], parts[2]]
-  const day = parseInt(ddStr, 10) || 1
-  const month = indoMonths[monthStr.toLowerCase()] ?? 0
-  const year = parseInt(yyStr, 10) || 1970
-  return new Date(year, month, day).getTime()
-}
+const BukuCard = dynamic<{ doc: any }>(() => import('@/components/warga/BukuCard'), {
+  ssr: false,
+})
+
+type SortOrder = 'asc' | 'desc' | null
 
 export default function BukuLembaranDesa() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
+  const [documents, setDocuments] = useState<Document[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc') // Default: terbaru dulu
+  const [currentPage, setCurrentPage] = useState(1)
+  const perPage = 10 // Tampilkan 10 dokumen per halaman
 
+  console.log('🎬 BukuLembaranDesa component rendered')
+  console.log('📋 Current state:', {
+    loading,
+    documentsCount: documents.length,
+    currentPage,
+    perPage
+  })
+
+  // Check if component is mounted (client-side)
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Sync search query from URL
+  useEffect(() => {
+    if (!mounted) return
     const query = searchParams.get('search')
-    if (query) {
-      setSearchQuery(query)
-    } else {
-      setSearchQuery('')
+    setSearchQuery(query || '')
+  }, [searchParams, mounted])
+
+  // Fetch documents on mount
+  useEffect(() => {
+    if (!mounted) return
+    fetchDocuments()
+  }, [mounted])
+
+  const fetchDocuments = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      console.log('🔍 Fetching documents...')
+      const response = await getDocuments({ 
+        per_page: 100,
+        status: 'Disetujui'
+      })
+      
+      console.log('📦 Total documents from API:', response.data.length)
+      
+      // Filter hanya dokumen dengan jenis_dokumen = "peraturan_desa"
+      const filtered = response.data.filter(
+        (doc) => doc.jenis_dokumen === 'peraturan_desa' && doc.status === 'Disetujui'
+      )
+      
+      console.log('✅ Filtered peraturan_desa:', filtered.length)
+      
+      setDocuments(filtered)
+    } catch (err: any) {
+      console.error('❌ Error fetching documents:', err)
+      setError('Gagal memuat dokumen')
+    } finally {
+      setLoading(false)
     }
-  }, [searchParams])
+  }
 
-  const filteredData = useMemo(() => {
-    const base = !searchQuery.trim()
-      ? bukuData
-      : bukuData.filter((doc) => {
-          const query = searchQuery.toLowerCase()
-          return (
-            doc.title.toLowerCase().includes(query) ||
-            doc.description.toLowerCase().includes(query) ||
-            doc.date.toLowerCase().includes(query) ||
-            doc.id.toString().includes(query)
-          )
-        })
+  // Helper function untuk search
+  const matchesSearch = (doc: Document, query: string): boolean => {
+    if (!query) return true
+    
+    const q = query.toLowerCase()
+    
+    const tentang = doc.tentang?.toString().toLowerCase() || ''
+    const nomorDitetapkan = doc.nomor_ditetapkan?.toString().toLowerCase() || ''
+    const nomorDiundangkan = doc.nomor_diundangkan?.toString().toLowerCase() || ''
+    const tanggalDitetapkan = doc.tanggal_ditetapkan?.toString().toLowerCase() || ''
+    const keterangan = doc.keterangan?.toString().toLowerCase() || ''
+    
+    return (
+      tentang.includes(q) ||
+      nomorDitetapkan.includes(q) ||
+      nomorDiundangkan.includes(q) ||
+      tanggalDitetapkan.includes(q) ||
+      keterangan.includes(q) ||
+      doc.id.toString().includes(q)
+    )
+  }
 
-    return [...base].sort((a, b) => {
-      const diff = parseIndoDate(a.date) - parseIndoDate(b.date)
-      if (diff !== 0) return diff
-      return a.id - b.id
+  // Toggle sort order
+  const toggleSortOrder = () => {
+    setSortOrder((prev) => {
+      if (prev === 'desc') return 'asc'
+      if (prev === 'asc') return null
+      return 'desc'
     })
-  }, [searchQuery])
+  }
+
+  // Filter dan sort documents
+  const filteredData = useMemo(() => {
+    let filtered = documents
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter((doc) => matchesSearch(doc, searchQuery))
+    }
+
+    // Sort by tanggal_diundangkan
+    return [...filtered].sort((a, b) => {
+      const dateA = new Date(a.tanggal_diundangkan || 0).getTime()
+      const dateB = new Date(b.tanggal_diundangkan || 0).getTime()
+      
+      if (sortOrder === 'asc') {
+        return dateA - dateB // Lama ke baru
+      } else if (sortOrder === 'desc') {
+        return dateB - dateA // Baru ke lama
+      } else {
+        // No sort, keep original order
+        return 0
+      }
+    })
+  }, [documents, searchQuery, sortOrder])
+
+  const totalPages = Math.ceil(filteredData.length / perPage)
+  const startIndex = (currentPage - 1) * perPage
+  const endIndex = startIndex + perPage
+  const paginatedData = filteredData.slice(startIndex, endIndex)
 
   const highlightText = (text: string, query: string) => {
     if (!query.trim()) return text
@@ -82,39 +162,161 @@ export default function BukuLembaranDesa() {
     )
   }
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '-'
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return '-'
+    return date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
+  }
+
+  // Don't render until mounted
+  if (!mounted) {
+    console.log('⏳ Waiting for mount...')
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+      </div>
+    )
+  }
+
+  if (loading) {
+    console.log('⏳ Loading data...')
+    return (
+      <>
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">
+            Memuat Buku Lembaran Desa...
+          </h1>
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+          </div>
+        </main>
+      </>
+    )
+  }
+
+  if (error) {
+    console.log('❌ Error state:', error)
+    return (
+      <>
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center py-16">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={fetchDocuments}
+              className="px-6 py-2 bg-green-700 text-white rounded-full hover:bg-green-800 transition-colors"
+            >
+              Coba Lagi
+            </button>
+          </div>
+        </main>
+      </>
+    )
+  }
+
   return (
     <>
-      <Head>
-        <title>Buku Lembaran Desa - Warga</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
-
       <Header />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          Buku Lembaran Desa
-          {searchQuery && (
-            <span className="text-lg font-normal text-gray-600 ml-3">
-              ({filteredData.length} hasil untuk "{searchQuery}")
-            </span>
-          )}
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Buku Lembaran Desa
+            {searchQuery && (
+              <span className="text-lg font-normal text-gray-600 ml-3">
+                ({filteredData.length} hasil untuk "{searchQuery}")
+              </span>
+            )}
+          </h1>
+
+          {/* Sort Button */}
+          <button
+            onClick={toggleSortOrder}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+            title={
+              sortOrder === 'desc' 
+                ? 'Urutkan: Terbaru → Terlama' 
+                : sortOrder === 'asc' 
+                ? 'Urutkan: Terlama → Terbaru' 
+                : 'Urutan Default'
+            }
+          >
+            {sortOrder === 'desc' ? (
+              <>
+                <ArrowDown className="w-4 h-4" />
+                <span>Terbaru</span>
+              </>
+            ) : sortOrder === 'asc' ? (
+              <>
+                <ArrowUp className="w-4 h-4" />
+                <span>Terlama</span>
+              </>
+            ) : (
+              <>
+                <ArrowUpDown className="w-4 h-4" />
+                <span>Urutkan</span>
+              </>
+            )}
+          </button>
+        </div>
 
         {filteredData.length > 0 ? (
-          <div className="space-y-6">
-            {filteredData.map((doc) => (
-              <BukuCard
-                key={doc.id}
-                id={doc.id}
-                title={highlightText(doc.title, searchQuery) as any}
-                date={doc.date}
-                description={highlightText(doc.description, searchQuery) as any}
-                downloads={doc.downloads}
-                lines={4}
-              />
-            ))}
-          </div>
+          <>
+            {console.log('✅ Rendering dokumen list, count:', paginatedData.length)}
+            <div className="space-y-6">
+              {paginatedData.map((docItem) => {
+                console.log('📄 Rendering document:', docItem)
+                
+                // Skip jika docItem undefined atau null
+                if (!docItem) {
+                  console.warn('⚠️ Skipping undefined docItem')
+                  return null
+                }
+                
+                return (
+                  <BukuCard
+                    key={docItem.id}
+                    doc={docItem}
+                  />
+                )
+              })}
+            </div>
+
+            {/* Pagination */}
+            {console.log('🔍 Checking pagination: totalPages =', totalPages, 'should show?', totalPages > 1)}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-6 bg-white border border-gray-200 rounded-lg mt-8">
+                <div className="text-sm text-gray-700">
+                  Menampilkan {startIndex + 1} - {Math.min(endIndex, filteredData.length)} dari {filteredData.length} dokumen
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="px-4 py-2 border border-gray-300 rounded-lg bg-green-50 font-medium">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-16">
             <svg
