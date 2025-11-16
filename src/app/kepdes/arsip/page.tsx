@@ -35,7 +35,7 @@ export default function ArsipPage() {
             nomorTanggalDitetapkan: "17 Agustus 2024",
             tentang: "Peraturan Desa Tentang Pengelolaan Keuangan",
             tanggal: "17 Agustus 2024",
-            nomor: "01",
+            nomor_arsip: "01",
             pdfUrl: "/sample.pdf",
         },
         {
@@ -44,7 +44,7 @@ export default function ArsipPage() {
             nomorTanggalDitetapkan: "01 Maret 2025",
             tentang: "Peraturan Tentang Rencana Pembangunan",
             tanggal: "01 Maret 2025",
-            nomor: "02",
+            nomor_arsip: "02",
             pdfUrl: "/sample.pdf",
         },
         {
@@ -53,7 +53,7 @@ export default function ArsipPage() {
             nomorTanggalDitetapkan: "30 Juli 2025",
             tentang: "Peraturan Tentang Pajak Desa",
             tanggal: "30 Juli 2025",
-            nomor_: "03",
+            nomor_arsip: "03",
             pdfUrl: "/sample.pdf",
         },
     ];

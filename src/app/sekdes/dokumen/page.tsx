@@ -7,7 +7,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   getDocuments,
   downloadDocument,
-  updateDocument,
+  updateSekdesDocument as updateDocument,
   type Document as APIDocument,
 } from "@/lib/api";
 import { createArchive } from "@/lib/api";

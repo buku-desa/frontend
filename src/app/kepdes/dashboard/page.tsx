@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { DocumentCard } from "@/components/kepala-desa/document-card"
 import { SearchBar } from "@/components/kepala-desa/search-bar"
 import { VerificationTable } from "@/components/kepala-desa/verification-table"
-import { DocumentChart } from "@/components/kepala-desa/document-chart"
+import  DocumentChart from "@/components/kepala-desa/document-chart"
 import ArsipTabel from "@/components/kepala-desa/arsiptabel"
 import TabelAktivitas from "@/components/kepala-desa/tabelaktivitas"
 import { JenisCard } from "@/components/kepala-desa/jenis-card"
@@ -122,7 +122,7 @@ export default function DashboardPage() {
 
         {/* Chart */}
         <div className="mb-12">
-          <DocumentChart documents={documents} />
+          <DocumentChart />
         </div>
 
         {/* Verifikasi Dokumen Section */}

@@ -139,8 +139,12 @@ export default function BukuTable({ data, searchQuery }: BukuTableProps) {
                 .sort((a, b) => {
                   if (!sortField || !sortOrder) return 0
 
-                  const tA = new Date(a[sortField]).getTime()
-                  const tB = new Date(b[sortField]).getTime()
+                  const rawA = a[sortField] ?? ""
+                  const rawB = b[sortField] ?? ""
+
+                  // convert ke waktu, jika NaN → jadikan 0
+                  const tA = new Date(rawA).getTime() || 0
+                  const tB = new Date(rawB).getTime() || 0
 
                   return sortOrder === 'desc' ? tB - tA : tA - tB
                 })

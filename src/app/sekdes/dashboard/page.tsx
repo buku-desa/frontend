@@ -8,9 +8,9 @@ import Link from "next/link";
 import {
   getDocuments,
   downloadDocument,
-  createDocument,
-  updateDocument,
-  deleteDocument,
+  createSekdesDocument as createDocument,
+  updateSekdesDocument as updateDocument,
+  deleteSekdesDocument as deleteDocument,
   type Document as APIDocument,
   type CreateDocumentData,
 } from "@/lib/api";

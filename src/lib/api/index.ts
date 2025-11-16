@@ -8,7 +8,18 @@ export * from './shared/auth';
 export * from './shared/documents';
 
 // Documents (sekdes)
-export * from './sekdes/documents';
+export {
+  createDocument as createSekdesDocument,
+  updateDocument as updateSekdesDocument,
+  deleteDocument as deleteSekdesDocument,
+  downloadDocument as downloadSekdesDocument,
+  // ...export other sekdes functions explicitly as needed
+} from './sekdes/documents';
+
+export type {
+  CreateDocumentData,
+  UpdateDocumentData,
+} from "./sekdes/documents";
 
 // Archives
 export * from './shared/archives';
