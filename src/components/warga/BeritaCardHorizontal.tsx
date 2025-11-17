@@ -20,7 +20,7 @@ export default function BeritaCardHorizontal({ data, searchQuery }: BeritaCardHo
     try {
       // Coba berbagai format parameter
       const params: any = { 
-        // status: 'Disetujui',
+        status: 'Disetujui',
         per_page: 100, 
       }
       if (query && query.trim()) params.search = query.trim()
