@@ -122,7 +122,7 @@ export default function TabelArsip() {
 
             {/* Table */}
             <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg">
-                <table className="w-full border-collapse table-fixed">
+                <table className="w-full border-collapse min-w-[800px]">
                     <thead>
                         <tr className="bg-green-800 text-white">
                             <th className="border border-gray-300 px-6 py-3 text-left font-semibold">NO</th>

@@ -87,8 +87,8 @@ export default function SearchBar({ onSearchResults, onSearchQuery }: SearchBarP
 
   return (
     <div className="w-full">
-      <div className="bg-white rounded-2xl shadow-lg p-2 flex items-center gap-2 border border-gray-200">
-        <div className="flex-1 flex items-center gap-3 px-4">
+      <div className="bg-white rounded-2xl shadow-lg p-2 flex items-center gap-2 border border-gray-200 flex-nowrap">
+        <div className="flex-1 min-w-0 flex items-center gap-3 px-4">
           <Search className="text-gray-400" size={20} />
           <input
             type="text"
@@ -102,7 +102,7 @@ export default function SearchBar({ onSearchResults, onSearchQuery }: SearchBarP
         <button
           onClick={handleSearch}
           disabled={loading}
-          className="px-8 py-3 rounded-xl bg-green-700 hover:bg-green-800 text-white font-semibold transition-colors flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="px-4 sm:px-8 py-3 rounded-xl bg-green-700 hover:bg-green-800 text-white font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
         >
           <Search size={18} />
           {loading ? 'Mencari...' : 'Search'}
