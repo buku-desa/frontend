@@ -6,6 +6,8 @@ import { SearchBar } from "@/components/kepala-desa/search-bar"
 import { VerificationTable } from "@/components/kepala-desa/verification-table"
 import { JenisCard } from "@/components/kepala-desa/jenis-card"
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function DokumenPage() {
     const [searchQuery, setSearchQuery] = useState("")
     const [documents, setDocuments] = useState<any[]>([])
@@ -16,7 +18,7 @@ export default function DokumenPage() {
         const fetchDocuments = async () => {
             try {
                 const token = localStorage.getItem("token")
-                const res = await fetch("http://127.0.0.1:8000/api/documents", {
+                const res = await fetch(`${API_URL}/documents`, {
                     headers: {
                         Authorization: token ? `Bearer ${token}` : "",
                         Accept: "application/json",
@@ -38,7 +40,7 @@ export default function DokumenPage() {
     const handleVerify = async (docId: string) => {
         // Refresh data setelah verify
         const token = localStorage.getItem("token")
-        const res = await fetch("http://127.0.0.1:8000/api/documents", {
+        const res = await fetch(`${API_URL}/documents`, {
             headers: {
                 Authorization: token ? `Bearer ${token}` : "",
                 Accept: "application/json",
@@ -51,7 +53,7 @@ export default function DokumenPage() {
     const handleDecline = async (docId: string) => {
         // Refresh data setelah decline
         const token = localStorage.getItem("token")
-        const res = await fetch("http://127.0.0.1:8000/api/documents", {
+        const res = await fetch(`${API_URL}/documents`, {
             headers: {
                 Authorization: token ? `Bearer ${token}` : "",
                 Accept: "application/json",
