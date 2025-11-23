@@ -8,6 +8,8 @@ import { Loader2 } from "lucide-react";
 
 dayjs.locale("id");
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export interface Activity {
   no: number;
   waktu: string;
@@ -34,7 +36,7 @@ export default function AktivitasPage() {
 
     const fetchActivities = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/activity-logs", {
+        const res = await fetch(`${API_URL}/activity-logs`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
