@@ -215,7 +215,7 @@ export function VerificationTable({
                         <>
                             <Button
                                 size="sm"
-                                className="bg-green-700 hover:bg-green-800 text-white p-2 h-auto"
+                                className="bg-green-100 hover:bg-green-200 text-green-700 p-2 h-auto"
                                 onClick={() => setVerifyConfirm({ isOpen: true, docId: doc.id })}
                             >
                                 <Check size={18} />
