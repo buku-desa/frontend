@@ -118,12 +118,12 @@ export default function ArsipPage() {
                         onSearch={(q) => setSearchQuery(q)}
                     />
                 </div>
-
+            </div>
                 {/* Tabel Arsip */}
                 <div className="bg-white rounded-2xl shadow-md overflow-x-auto mt-8">
                     <ArsipTabel />
                 </div>
-            </div>
+            
 
             {/* PDF Viewer Modal */}
             <PDFViewerModal

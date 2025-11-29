@@ -22,7 +22,7 @@ export function DeclineConfirmationDialog({
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm mx-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Konfirmasi Verifikasi</h3>
                 <p className="text-gray-600 mb-6">
-                    Apakah anda yakin ingin verifikasi {documentName} (akan ditolak)? Dokumen ini akan langsung terlihat oleh publik setelah diverifikasi.
+                    Apakah anda yakin ingin verifikasi {documentName} (akan ditolak)? Dokumen berstatus ditolak dan dapat di update oleh Sekdes.
                 </p>
                 <div className="flex gap-3 justify-end">
                     <Button onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-900">
